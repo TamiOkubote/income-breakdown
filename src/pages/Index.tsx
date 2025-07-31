@@ -2,11 +2,12 @@ import { useState } from "react";
 import Header from "@/components/Header";
 import IncomeForm from "@/components/IncomeForm";
 import ExpenseBreakdown from "@/components/ExpenseBreakdown";
-import InvestmentRecommendations from "@/components/InvestmentRecommendations";
+import InvestmentStrategies from "@/components/InvestmentStrategies";
 import FinancialSummary from "@/components/FinancialSummary";
 
 interface FormData {
   postcode: string;
+  workplacePostcode: string;
   income: number;
 }
 
@@ -14,15 +15,43 @@ const Index = () => {
   const [formData, setFormData] = useState<FormData | null>(null);
   const [totalExpenses, setTotalExpenses] = useState(0);
 
+  const calculateDistanceMultiplier = (homePostcode: string, workPostcode: string) => {
+    // Simplified distance calculation based on postcode areas
+    const getPostcodeArea = (postcode: string) => postcode.replace(/\d.*/, '');
+    const homeArea = getPostcodeArea(homePostcode);
+    const workArea = getPostcodeArea(workPostcode);
+    
+    // London areas
+    const londonAreas = ['SW', 'SE', 'E', 'W', 'N', 'NW', 'EC', 'WC'];
+    const isHomeLondon = londonAreas.some(area => homeArea.startsWith(area));
+    const isWorkLondon = londonAreas.some(area => workArea.startsWith(area));
+    
+    if (isHomeLondon && isWorkLondon) return 1.0; // Both in London
+    if (isHomeLondon || isWorkLondon) return 1.4; // One in London, one outside
+    if (homeArea === workArea) return 0.8; // Same area
+    return 1.2; // Different areas outside London
+  };
+
   const handleFormSubmit = (data: FormData) => {
     setFormData(data);
     
-    // Calculate total expenses based on income and location
+    // Calculate realistic capped expenses
     const locationMultiplier = data.postcode.startsWith('SW') || data.postcode.startsWith('W') ? 1.3 : 
                               data.postcode.startsWith('E') || data.postcode.startsWith('SE') ? 1.1 : 1.0;
     
-    const expenses = data.income * (0.75 * locationMultiplier); // Roughly 75% of income on expenses
-    setTotalExpenses(Math.round(expenses));
+    const distanceMultiplier = calculateDistanceMultiplier(data.postcode, data.workplacePostcode);
+    
+    // Realistic expense caps (not percentage-based for all categories)
+    const baseTransport = Math.min(data.income * 0.15 * locationMultiplier * distanceMultiplier, 300);
+    const baseCar = Math.min(data.income * 0.12 * locationMultiplier, 250);
+    const baseSubscriptions = Math.min(data.income * 0.08, 80); // Cap at £80
+    const baseShopping = Math.min(data.income * 0.20, Math.max(data.income * 0.15, 200)); // Minimum £200
+    const baseOutings = Math.min(data.income * 0.12, 200); // Cap at £200
+    const baseVacations = Math.min(data.income * 0.05, 150); // Cap at £150
+    const baseMaintenance = Math.min(data.income * 0.03, 100); // Cap at £100
+    
+    const totalExpenses = baseTransport + baseCar + baseSubscriptions + baseShopping + baseOutings + baseVacations + baseMaintenance;
+    setTotalExpenses(Math.round(totalExpenses));
   };
 
   const remainingIncome = formData ? formData.income - totalExpenses : 0;
@@ -52,7 +81,7 @@ const Index = () => {
                 Your Personalized Financial Plan
               </h2>
               <p className="text-muted-foreground">
-                Based on £{formData.income} monthly income in {formData.postcode}
+                Based on £{formData.income} monthly income • Home: {formData.postcode} • Work: {formData.workplacePostcode}
               </p>
             </div>
             
@@ -65,12 +94,13 @@ const Index = () => {
                 />
                 <ExpenseBreakdown 
                   income={formData.income} 
-                  postcode={formData.postcode} 
+                  postcode={formData.postcode}
+                  workplacePostcode={formData.workplacePostcode}
                 />
               </div>
               
               <div>
-                <InvestmentRecommendations remainingIncome={remainingIncome} />
+                <InvestmentStrategies remainingIncome={remainingIncome} />
               </div>
             </div>
             

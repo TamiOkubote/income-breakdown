@@ -6,17 +6,18 @@ import { Button } from "@/components/ui/button";
 import { MapPin, PoundSterling } from "lucide-react";
 
 interface IncomeFormProps {
-  onSubmit: (data: { postcode: string; income: number }) => void;
+  onSubmit: (data: { postcode: string; workplacePostcode: string; income: number }) => void;
 }
 
 const IncomeForm = ({ onSubmit }: IncomeFormProps) => {
   const [postcode, setPostcode] = useState("");
+  const [workplacePostcode, setWorkplacePostcode] = useState("");
   const [income, setIncome] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (postcode && income) {
-      onSubmit({ postcode, income: parseFloat(income) });
+    if (postcode && workplacePostcode && income) {
+      onSubmit({ postcode, workplacePostcode, income: parseFloat(income) });
     }
   };
 
@@ -33,7 +34,7 @@ const IncomeForm = ({ onSubmit }: IncomeFormProps) => {
           <div className="space-y-2">
             <Label htmlFor="postcode" className="text-sm font-medium flex items-center gap-2">
               <MapPin className="h-4 w-4 text-primary" />
-              Postcode
+              Home Postcode
             </Label>
             <Input
               id="postcode"
@@ -41,6 +42,22 @@ const IncomeForm = ({ onSubmit }: IncomeFormProps) => {
               placeholder="e.g., SW1A 1AA"
               value={postcode}
               onChange={(e) => setPostcode(e.target.value.toUpperCase())}
+              className="h-12 text-center font-mono tracking-wider"
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="workplace-postcode" className="text-sm font-medium flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-accent" />
+              Workplace Postcode
+            </Label>
+            <Input
+              id="workplace-postcode"
+              type="text"
+              placeholder="e.g., EC2A 4DP"
+              value={workplacePostcode}
+              onChange={(e) => setWorkplacePostcode(e.target.value.toUpperCase())}
               className="h-12 text-center font-mono tracking-wider"
               required
             />
@@ -70,7 +87,7 @@ const IncomeForm = ({ onSubmit }: IncomeFormProps) => {
           <Button 
             type="submit" 
             className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity"
-            disabled={!postcode || !income}
+            disabled={!postcode || !workplacePostcode || !income}
           >
             Analyze My Finances
           </Button>
