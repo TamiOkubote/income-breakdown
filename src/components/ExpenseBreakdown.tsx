@@ -48,13 +48,27 @@ interface ExpenseItem {
 interface ExpenseBreakdownProps {
   income: number;
   postcode: string;
+  city: string;
   workplacePostcode: string;
 }
 
-const ExpenseBreakdown = ({ income, postcode, workplacePostcode }: ExpenseBreakdownProps) => {
-  // Location-based multipliers (simplified)
-  const locationMultiplier = postcode.startsWith('SW') || postcode.startsWith('W') ? 1.3 : 
-                           postcode.startsWith('E') || postcode.startsWith('SE') ? 1.1 : 1.0;
+const ExpenseBreakdown = ({ income, postcode, city, workplacePostcode }: ExpenseBreakdownProps) => {
+  // Calculate city-based multipliers
+  const getCityMultiplier = (city: string) => {
+    const cityLower = city.toLowerCase();
+    
+    if (cityLower.includes('london')) return 1.5;
+    if (cityLower.includes('cambridge') || cityLower.includes('oxford')) return 1.3;
+    if (cityLower.includes('brighton') || cityLower.includes('bath')) return 1.25;
+    if (cityLower.includes('bristol') || cityLower.includes('manchester') || 
+        cityLower.includes('birmingham') || cityLower.includes('edinburgh')) return 1.15;
+    if (cityLower.includes('reading') || cityLower.includes('leeds') || 
+        cityLower.includes('sheffield') || cityLower.includes('liverpool')) return 1.0;
+    
+    return 0.9;
+  };
+
+  const cityMultiplier = getCityMultiplier(city);
   
   // Distance-based transport multiplier
   const calculateDistanceMultiplier = (homePostcode: string, workPostcode: string) => {
@@ -77,26 +91,26 @@ const ExpenseBreakdown = ({ income, postcode, workplacePostcode }: ExpenseBreakd
   const expenses: ExpenseItem[] = [
     {
       category: "Transport",
-      amount: Math.round(Math.min(income * 0.15 * locationMultiplier * distanceMultiplier, 300)),
-      percentage: Math.min(15 * locationMultiplier * distanceMultiplier, 30),
+      amount: Math.round(Math.min(income * 0.15 * distanceMultiplier, 350)),
+      percentage: Math.min(15 * distanceMultiplier, 25),
       icon: <MapPin className="h-5 w-5 text-primary" />,
       description: "Public transport, cycling, occasional taxi",
       subExpenses: [
         {
           name: "Monthly Oyster Card",
-          amount: Math.round(Math.min(income * 0.08 * locationMultiplier * distanceMultiplier, 180)),
+          amount: Math.round(Math.min(income * 0.08 * distanceMultiplier, 180)),
           description: "Zones 1-3 unlimited travel (£156/month)",
           icon: <Train className="h-4 w-4 text-primary" />
         },
         {
           name: "Bus Travel",
-          amount: Math.round(Math.min(income * 0.04 * locationMultiplier * distanceMultiplier, 80)),
+          amount: Math.round(Math.min(income * 0.04 * distanceMultiplier, 80)),
           description: "Daily bus fares (£1.75 per journey)",
           icon: <Bus className="h-4 w-4 text-primary" />
         },
         {
           name: "Taxi/Uber",
-          amount: Math.round(Math.min(income * 0.03 * locationMultiplier, 60)),
+          amount: Math.round(Math.min(income * 0.03, 60)),
           description: "Occasional rides and late-night transport",
           icon: <Car className="h-4 w-4 text-primary" />
         }
@@ -104,32 +118,32 @@ const ExpenseBreakdown = ({ income, postcode, workplacePostcode }: ExpenseBreakd
     },
     {
       category: "Car Costs",
-      amount: Math.round(Math.min(income * 0.12 * locationMultiplier, 250)),
-      percentage: Math.min(12 * locationMultiplier, 25),
+      amount: Math.round(Math.min(income * 0.12 * cityMultiplier, 280)),
+      percentage: Math.min(12 * cityMultiplier, 28),
       icon: <Car className="h-5 w-5 text-expense-red" />,
       description: "Fuel, insurance, maintenance, parking",
       subExpenses: [
         {
           name: "Fuel",
-          amount: Math.round(income * 0.05 * locationMultiplier),
+          amount: Math.round(income * 0.05 * cityMultiplier),
           description: "Petrol at £1.50/litre (£80-120/month)",
           icon: <Fuel className="h-4 w-4 text-expense-red" />
         },
         {
           name: "Insurance",
-          amount: Math.round(income * 0.04 * locationMultiplier),
+          amount: Math.round(income * 0.04 * cityMultiplier),
           description: "Young driver insurance (£80-150/month)",
           icon: <Shield className="h-4 w-4 text-expense-red" />
         },
         {
           name: "Parking",
-          amount: Math.round(income * 0.02 * locationMultiplier),
+          amount: Math.round(income * 0.02 * cityMultiplier),
           description: "Daily parking fees and permits",
           icon: <Building className="h-4 w-4 text-expense-red" />
         },
         {
           name: "Maintenance",
-          amount: Math.round(income * 0.01 * locationMultiplier),
+          amount: Math.round(income * 0.01 * cityMultiplier),
           description: "Servicing, MOT, repairs (£30-50/month)",
           icon: <Wrench className="h-4 w-4 text-expense-red" />
         }
@@ -170,8 +184,8 @@ const ExpenseBreakdown = ({ income, postcode, workplacePostcode }: ExpenseBreakd
     },
     {
       category: "Shopping",
-      amount: Math.round(income * 0.20),
-      percentage: 20,
+      amount: Math.round(Math.min(income * 0.18 * cityMultiplier, Math.max(income * 0.12, 180))),
+      percentage: Math.min(18 * cityMultiplier, 25),
       icon: <ShoppingCart className="h-5 w-5 text-finance-green" />,
       description: "Groceries, clothing, personal items",
       subExpenses: [
@@ -203,8 +217,8 @@ const ExpenseBreakdown = ({ income, postcode, workplacePostcode }: ExpenseBreakd
     },
     {
       category: "Outings & Social",
-      amount: Math.round(Math.min(income * 0.12, 200)),
-      percentage: Math.min((Math.min(income * 0.12, 200) / income) * 100, 12),
+      amount: Math.round(Math.min(income * 0.12 * cityMultiplier, cityMultiplier > 1.3 ? 300 : 180)),
+      percentage: Math.min(12 * cityMultiplier, cityMultiplier > 1.3 ? 20 : 15),
       icon: <Coffee className="h-5 w-5 text-investment-purple" />,
       description: "Restaurants, bars, events, socializing",
       subExpenses: [
@@ -296,7 +310,7 @@ const ExpenseBreakdown = ({ income, postcode, workplacePostcode }: ExpenseBreakd
             Monthly Expense Breakdown
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Estimated costs based on home: {postcode} and work: {workplacePostcode}
+            Estimated costs based on {city}, {postcode} and work: {workplacePostcode}
           </p>
         </CardHeader>
         <CardContent className="space-y-4">

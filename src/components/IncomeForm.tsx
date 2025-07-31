@@ -6,18 +6,19 @@ import { Button } from "@/components/ui/button";
 import { MapPin, PoundSterling } from "lucide-react";
 
 interface IncomeFormProps {
-  onSubmit: (data: { postcode: string; workplacePostcode: string; income: number }) => void;
+  onSubmit: (data: { postcode: string; city: string; workplacePostcode: string; income: number }) => void;
 }
 
 const IncomeForm = ({ onSubmit }: IncomeFormProps) => {
   const [postcode, setPostcode] = useState("");
+  const [city, setCity] = useState("");
   const [workplacePostcode, setWorkplacePostcode] = useState("");
   const [income, setIncome] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (postcode && workplacePostcode && income) {
-      onSubmit({ postcode, workplacePostcode, income: parseFloat(income) });
+    if (postcode && city && workplacePostcode && income) {
+      onSubmit({ postcode, city, workplacePostcode, income: parseFloat(income) });
     }
   };
 
@@ -43,6 +44,22 @@ const IncomeForm = ({ onSubmit }: IncomeFormProps) => {
               value={postcode}
               onChange={(e) => setPostcode(e.target.value.toUpperCase())}
               className="h-12 text-center font-mono tracking-wider"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="city" className="text-sm font-medium flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-secondary" />
+              City/Town/Village
+            </Label>
+            <Input
+              id="city"
+              type="text"
+              placeholder="e.g., London, Reading, Manchester"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              className="h-12 text-center"
               required
             />
           </div>
@@ -87,7 +104,7 @@ const IncomeForm = ({ onSubmit }: IncomeFormProps) => {
           <Button 
             type="submit" 
             className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity"
-            disabled={!postcode || !workplacePostcode || !income}
+            disabled={!postcode || !city || !workplacePostcode || !income}
           >
             Analyze My Finances
           </Button>

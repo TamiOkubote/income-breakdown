@@ -1,17 +1,21 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { TrendingUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import IncomeForm from "@/components/IncomeForm";
 import ExpenseBreakdown from "@/components/ExpenseBreakdown";
-import InvestmentStrategies from "@/components/InvestmentStrategies";
 import FinancialSummary from "@/components/FinancialSummary";
 
 interface FormData {
   postcode: string;
+  city: string;
   workplacePostcode: string;
   income: number;
 }
 
 const Index = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData | null>(null);
   const [totalExpenses, setTotalExpenses] = useState(0);
 
@@ -32,23 +36,40 @@ const Index = () => {
     return 1.2; // Different areas outside London
   };
 
+  const getCityMultiplier = (city: string) => {
+    const cityLower = city.toLowerCase();
+    
+    // Major expensive cities
+    if (cityLower.includes('london')) return 1.5;
+    if (cityLower.includes('cambridge') || cityLower.includes('oxford')) return 1.3;
+    if (cityLower.includes('brighton') || cityLower.includes('bath')) return 1.25;
+    
+    // Medium-cost cities
+    if (cityLower.includes('bristol') || cityLower.includes('manchester') || 
+        cityLower.includes('birmingham') || cityLower.includes('edinburgh')) return 1.15;
+    
+    // Lower-cost areas
+    if (cityLower.includes('reading') || cityLower.includes('leeds') || 
+        cityLower.includes('sheffield') || cityLower.includes('liverpool')) return 1.0;
+    
+    // Default for other areas
+    return 0.9;
+  };
+
   const handleFormSubmit = (data: FormData) => {
     setFormData(data);
     
-    // Calculate realistic capped expenses
-    const locationMultiplier = data.postcode.startsWith('SW') || data.postcode.startsWith('W') ? 1.3 : 
-                              data.postcode.startsWith('E') || data.postcode.startsWith('SE') ? 1.1 : 1.0;
-    
+    const cityMultiplier = getCityMultiplier(data.city);
     const distanceMultiplier = calculateDistanceMultiplier(data.postcode, data.workplacePostcode);
     
-    // Realistic expense caps (not percentage-based for all categories)
-    const baseTransport = Math.min(data.income * 0.15 * locationMultiplier * distanceMultiplier, 300);
-    const baseCar = Math.min(data.income * 0.12 * locationMultiplier, 250);
-    const baseSubscriptions = Math.min(data.income * 0.08, 80); // Cap at £80
-    const baseShopping = Math.min(data.income * 0.20, Math.max(data.income * 0.15, 200)); // Minimum £200
-    const baseOutings = Math.min(data.income * 0.12, 200); // Cap at £200
-    const baseVacations = Math.min(data.income * 0.05, 150); // Cap at £150
-    const baseMaintenance = Math.min(data.income * 0.03, 100); // Cap at £100
+    // Location-based expense calculations with realistic caps
+    const baseTransport = Math.min(data.income * 0.15 * distanceMultiplier, 350);
+    const baseCar = Math.min(data.income * 0.12 * cityMultiplier, 280);
+    const baseSubscriptions = Math.min(data.income * 0.08, 85); // Cap at £85
+    const baseShopping = Math.min(data.income * 0.18 * cityMultiplier, Math.max(data.income * 0.12, 180));
+    const baseOutings = Math.min(data.income * 0.12 * cityMultiplier, cityMultiplier > 1.3 ? 300 : 180);
+    const baseVacations = Math.min(data.income * 0.06, 160); // Cap at £160
+    const baseMaintenance = Math.min(data.income * 0.04, 120); // Cap at £120
     
     const totalExpenses = baseTransport + baseCar + baseSubscriptions + baseShopping + baseOutings + baseVacations + baseMaintenance;
     setTotalExpenses(Math.round(totalExpenses));
@@ -81,7 +102,7 @@ const Index = () => {
                 Your Personalized Financial Plan
               </h2>
               <p className="text-muted-foreground">
-                Based on £{formData.income} monthly income • Home: {formData.postcode} • Work: {formData.workplacePostcode}
+                Based on £{formData.income} monthly income • {formData.city}, {formData.postcode} • Work: {formData.workplacePostcode}
               </p>
             </div>
             
@@ -95,12 +116,28 @@ const Index = () => {
                 <ExpenseBreakdown 
                   income={formData.income} 
                   postcode={formData.postcode}
+                  city={formData.city}
                   workplacePostcode={formData.workplacePostcode}
                 />
               </div>
               
-              <div>
-                <InvestmentStrategies remainingIncome={remainingIncome} />
+              <div className="flex flex-col items-center space-y-4">
+                <div className="text-center space-y-2">
+                  <h3 className="text-xl font-semibold text-primary">Ready to Invest?</h3>
+                  <p className="text-muted-foreground">
+                    Explore investment strategies and detailed portfolio recommendations
+                  </p>
+                </div>
+                <Button 
+                  onClick={() => navigate('/investments', { 
+                    state: { remainingIncome, formData } 
+                  })}
+                  className="flex items-center gap-2"
+                  size="lg"
+                >
+                  <TrendingUp className="h-5 w-5" />
+                  View Investment Options
+                </Button>
               </div>
             </div>
             
