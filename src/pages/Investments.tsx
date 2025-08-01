@@ -26,7 +26,7 @@ const Investments = () => {
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
-                  onClick={() => navigate('/')}
+                  onClick={() => navigate('/', { state: { formData } })}
                   className="flex items-center gap-2 text-primary hover:text-primary/80"
                 >
                   <ArrowLeft className="h-4 w-4" />
@@ -38,7 +38,7 @@ const Investments = () => {
                 Investment Portfolio
               </h1>
               <p className="text-muted-foreground">
-                £{remainingIncome}/month available for investment • {formData.city}, {formData.postcode}
+                £{remainingIncome}/month available for investment • {formData.city}, {formData.postcode} • Work: {formData.workplaceCity}, {formData.workplacePostcode}
               </p>
             </div>
           </div>

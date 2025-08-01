@@ -6,11 +6,13 @@ import Header from "@/components/Header";
 import IncomeForm from "@/components/IncomeForm";
 import ExpenseBreakdown from "@/components/ExpenseBreakdown";
 import FinancialSummary from "@/components/FinancialSummary";
+import InvestmentStrategies from "@/components/InvestmentStrategies";
 
 interface FormData {
   postcode: string;
   city: string;
   workplacePostcode: string;
+  workplaceCity: string;
   income: number;
 }
 
@@ -60,14 +62,16 @@ const Index = () => {
     setFormData(data);
     
     const cityMultiplier = getCityMultiplier(data.city);
+    const workplaceCityMultiplier = getCityMultiplier(data.workplaceCity);
     const distanceMultiplier = calculateDistanceMultiplier(data.postcode, data.workplacePostcode);
     
-    // Location-based expense calculations with realistic caps
+    // Enhanced location-based expense calculations with workplace consideration
+    const avgCityMultiplier = (cityMultiplier + workplaceCityMultiplier) / 2;
     const baseTransport = Math.min(data.income * 0.15 * distanceMultiplier, 350);
-    const baseCar = Math.min(data.income * 0.12 * cityMultiplier, 280);
+    const baseCar = Math.min(data.income * 0.12 * avgCityMultiplier, 280);
     const baseSubscriptions = Math.min(data.income * 0.08, 85); // Cap at £85
     const baseShopping = Math.min(data.income * 0.18 * cityMultiplier, Math.max(data.income * 0.12, 180));
-    const baseOutings = Math.min(data.income * 0.12 * cityMultiplier, cityMultiplier > 1.3 ? 300 : 180);
+    const baseOutings = Math.min(data.income * 0.12 * avgCityMultiplier, avgCityMultiplier > 1.3 ? 300 : 180);
     const baseVacations = Math.min(data.income * 0.06, 160); // Cap at £160
     const baseMaintenance = Math.min(data.income * 0.04, 120); // Cap at £120
     
@@ -102,12 +106,12 @@ const Index = () => {
                 Your Personalized Financial Plan
               </h2>
               <p className="text-muted-foreground">
-                Based on £{formData.income} monthly income • {formData.city}, {formData.postcode} • Work: {formData.workplacePostcode}
+                Based on £{formData.income} monthly income • {formData.city}, {formData.postcode} • Work: {formData.workplaceCity}, {formData.workplacePostcode}
               </p>
             </div>
             
-            <div className="grid gap-8 lg:grid-cols-2">
-              <div className="space-y-8">
+            <div className="space-y-8">
+              <div className="grid gap-8 lg:grid-cols-2">
                 <FinancialSummary 
                   income={formData.income}
                   totalExpenses={totalExpenses}
@@ -121,13 +125,9 @@ const Index = () => {
                 />
               </div>
               
-              <div className="flex flex-col items-center space-y-4">
-                <div className="text-center space-y-2">
-                  <h3 className="text-xl font-semibold text-primary">Ready to Invest?</h3>
-                  <p className="text-muted-foreground">
-                    Explore investment strategies and detailed portfolio recommendations
-                  </p>
-                </div>
+              <InvestmentStrategies remainingIncome={remainingIncome} />
+              
+              <div className="text-center">
                 <Button 
                   onClick={() => navigate('/investments', { 
                     state: { remainingIncome, formData } 
@@ -136,7 +136,7 @@ const Index = () => {
                   size="lg"
                 >
                   <TrendingUp className="h-5 w-5" />
-                  View Investment Options
+                  View Detailed Investment Options
                 </Button>
               </div>
             </div>

@@ -6,19 +6,20 @@ import { Button } from "@/components/ui/button";
 import { MapPin, PoundSterling } from "lucide-react";
 
 interface IncomeFormProps {
-  onSubmit: (data: { postcode: string; city: string; workplacePostcode: string; income: number }) => void;
+  onSubmit: (data: { postcode: string; city: string; workplacePostcode: string; workplaceCity: string; income: number }) => void;
 }
 
 const IncomeForm = ({ onSubmit }: IncomeFormProps) => {
   const [postcode, setPostcode] = useState("");
   const [city, setCity] = useState("");
   const [workplacePostcode, setWorkplacePostcode] = useState("");
+  const [workplaceCity, setWorkplaceCity] = useState("");
   const [income, setIncome] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (postcode && city && workplacePostcode && income) {
-      onSubmit({ postcode, city, workplacePostcode, income: parseFloat(income) });
+    if (postcode && city && workplacePostcode && workplaceCity && income) {
+      onSubmit({ postcode, city, workplacePostcode, workplaceCity, income: parseFloat(income) });
     }
   };
 
@@ -79,6 +80,22 @@ const IncomeForm = ({ onSubmit }: IncomeFormProps) => {
               required
             />
           </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="workplace-city" className="text-sm font-medium flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-accent" />
+              Workplace City/Town/Village
+            </Label>
+            <Input
+              id="workplace-city"
+              type="text"
+              placeholder="e.g., London, Birmingham, Leeds"
+              value={workplaceCity}
+              onChange={(e) => setWorkplaceCity(e.target.value)}
+              className="h-12 text-center"
+              required
+            />
+          </div>
           
           <div className="space-y-2">
             <Label htmlFor="income" className="text-sm font-medium flex items-center gap-2">
@@ -104,10 +121,14 @@ const IncomeForm = ({ onSubmit }: IncomeFormProps) => {
           <Button 
             type="submit" 
             className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity"
-            disabled={!postcode || !city || !workplacePostcode || !income}
+            disabled={!postcode || !city || !workplacePostcode || !workplaceCity || !income}
           >
             Analyze My Finances
           </Button>
+          
+          <div className="text-xs text-muted-foreground text-center mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+            <strong>Disclaimer:</strong> This is just advice, do not take the investment literally, and expenses may change due to the climate of the economy. Invest at your own risk.
+          </div>
         </form>
       </CardContent>
     </Card>
