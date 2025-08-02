@@ -10,7 +10,7 @@ const Header = () => {
               <Calculator className="h-8 w-8" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold">FinanceWise</h1>
+              <h1 className="text-2xl font-bold">Mr. Budget</h1>
               <p className="text-sm opacity-90">Smart budgeting for interns & apprentices</p>
             </div>
           </div>

@@ -14,6 +14,9 @@ interface FormData {
   workplacePostcode: string;
   workplaceCity: string;
   income: number;
+  hasHousing: boolean;
+  hasRoommates: boolean;
+  numRoommates: number;
 }
 
 const Index = () => {
@@ -67,6 +70,35 @@ const Index = () => {
     
     // Enhanced location-based expense calculations with workplace consideration
     const avgCityMultiplier = (cityMultiplier + workplaceCityMultiplier) / 2;
+    
+    // Tax calculations (UK tax bands for 2024/25)
+    const annualIncome = data.income * 12;
+    let annualTax = 0;
+    if (annualIncome > 12570) {
+      const basicRateIncome = Math.min(annualIncome - 12570, 37700);
+      annualTax += basicRateIncome * 0.2;
+      if (annualIncome > 50270) {
+        const higherRateIncome = Math.min(annualIncome - 50270, 75000);
+        annualTax += higherRateIncome * 0.4;
+        if (annualIncome > 125270) {
+          annualTax += (annualIncome - 125270) * 0.45;
+        }
+      }
+    }
+    const monthlyTax = annualTax / 12;
+    
+    // National Insurance calculations
+    const monthlyNI = data.income > 1048 ? (Math.min(data.income, 4189) - 1048) * 0.12 + 
+                     (data.income > 4189 ? (data.income - 4189) * 0.02 : 0) : 0;
+    
+    // Housing calculations
+    let baseHousing = 0;
+    if (data.hasHousing) {
+      const housingCost = Math.min(data.income * 0.35 * cityMultiplier, cityMultiplier > 1.3 ? 1200 : 800);
+      const totalRoommates = data.hasRoommates ? data.numRoommates + 1 : 1;
+      baseHousing = housingCost / totalRoommates;
+    }
+    
     const baseTransport = Math.min(data.income * 0.15 * distanceMultiplier, 350);
     const baseCar = Math.min(data.income * 0.12 * avgCityMultiplier, 280);
     const baseSubscriptions = Math.min(data.income * 0.08, 85); // Cap at £85
@@ -75,7 +107,7 @@ const Index = () => {
     const baseVacations = Math.min(data.income * 0.06, 160); // Cap at £160
     const baseMaintenance = Math.min(data.income * 0.04, 120); // Cap at £120
     
-    const totalExpenses = baseTransport + baseCar + baseSubscriptions + baseShopping + baseOutings + baseVacations + baseMaintenance;
+    const totalExpenses = monthlyTax + monthlyNI + baseHousing + baseTransport + baseCar + baseSubscriptions + baseShopping + baseOutings + baseVacations + baseMaintenance;
     setTotalExpenses(Math.round(totalExpenses));
   };
 
@@ -122,6 +154,9 @@ const Index = () => {
                   postcode={formData.postcode}
                   city={formData.city}
                   workplacePostcode={formData.workplacePostcode}
+                  hasHousing={formData.hasHousing}
+                  hasRoommates={formData.hasRoommates}
+                  numRoommates={formData.numRoommates}
                 />
               </div>
               

@@ -6,7 +6,16 @@ import { Button } from "@/components/ui/button";
 import { MapPin, PoundSterling } from "lucide-react";
 
 interface IncomeFormProps {
-  onSubmit: (data: { postcode: string; city: string; workplacePostcode: string; workplaceCity: string; income: number }) => void;
+  onSubmit: (data: { 
+    postcode: string; 
+    city: string; 
+    workplacePostcode: string; 
+    workplaceCity: string; 
+    income: number;
+    hasHousing: boolean;
+    hasRoommates: boolean;
+    numRoommates: number;
+  }) => void;
 }
 
 const IncomeForm = ({ onSubmit }: IncomeFormProps) => {
@@ -15,11 +24,28 @@ const IncomeForm = ({ onSubmit }: IncomeFormProps) => {
   const [workplacePostcode, setWorkplacePostcode] = useState("");
   const [workplaceCity, setWorkplaceCity] = useState("");
   const [income, setIncome] = useState("");
+  const [hasHousing, setHasHousing] = useState<boolean | null>(null);
+  const [hasRoommates, setHasRoommates] = useState<boolean | null>(null);
+  const [numRoommates, setNumRoommates] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (postcode && city && workplacePostcode && workplaceCity && income) {
-      onSubmit({ postcode, city, workplacePostcode, workplaceCity, income: parseFloat(income) });
+    const isFormValid = postcode && city && workplacePostcode && workplaceCity && income && 
+                       hasHousing !== null && 
+                       (hasHousing === false || (hasRoommates !== null && 
+                       (hasRoommates === false || numRoommates)));
+    
+    if (isFormValid) {
+      onSubmit({ 
+        postcode, 
+        city, 
+        workplacePostcode, 
+        workplaceCity, 
+        income: parseFloat(income),
+        hasHousing: hasHousing!,
+        hasRoommates: hasRoommates || false,
+        numRoommates: parseInt(numRoommates) || 0
+      });
     }
   };
 
@@ -118,10 +144,105 @@ const IncomeForm = ({ onSubmit }: IncomeFormProps) => {
             </div>
           </div>
 
+          <div className="space-y-4">
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Will you be paying for housing?</Label>
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setHasHousing(true);
+                    setHasRoommates(null);
+                    setNumRoommates("");
+                  }}
+                  className={`px-4 py-2 rounded-md border transition-colors ${
+                    hasHousing === true 
+                      ? 'bg-primary text-primary-foreground border-primary' 
+                      : 'border-border hover:bg-muted'
+                  }`}
+                >
+                  Yes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setHasHousing(false);
+                    setHasRoommates(null);
+                    setNumRoommates("");
+                  }}
+                  className={`px-4 py-2 rounded-md border transition-colors ${
+                    hasHousing === false 
+                      ? 'bg-primary text-primary-foreground border-primary' 
+                      : 'border-border hover:bg-muted'
+                  }`}
+                >
+                  No
+                </button>
+              </div>
+            </div>
+
+            {hasHousing && (
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Will you have roommates?</Label>
+                <div className="flex gap-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setHasRoommates(true);
+                      setNumRoommates("");
+                    }}
+                    className={`px-4 py-2 rounded-md border transition-colors ${
+                      hasRoommates === true 
+                        ? 'bg-primary text-primary-foreground border-primary' 
+                        : 'border-border hover:bg-muted'
+                    }`}
+                  >
+                    Yes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setHasRoommates(false);
+                      setNumRoommates("");
+                    }}
+                    className={`px-4 py-2 rounded-md border transition-colors ${
+                      hasRoommates === false 
+                        ? 'bg-primary text-primary-foreground border-primary' 
+                        : 'border-border hover:bg-muted'
+                    }`}
+                  >
+                    No
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {hasHousing && hasRoommates && (
+              <div className="space-y-2">
+                <Label htmlFor="num-roommates" className="text-sm font-medium">
+                  How many roommates?
+                </Label>
+                <Input
+                  id="num-roommates"
+                  type="number"
+                  placeholder="2"
+                  value={numRoommates}
+                  onChange={(e) => setNumRoommates(e.target.value)}
+                  className="h-12 text-center"
+                  min="1"
+                  max="10"
+                  required
+                />
+              </div>
+            )}
+          </div>
+
           <Button 
             type="submit" 
             className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity"
-            disabled={!postcode || !city || !workplacePostcode || !workplaceCity || !income}
+            disabled={!postcode || !city || !workplacePostcode || !workplaceCity || !income || 
+                     hasHousing === null || (hasHousing && hasRoommates === null) || 
+                     (hasHousing && hasRoommates && !numRoommates)}
           >
             Analyze My Finances
           </Button>

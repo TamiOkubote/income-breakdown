@@ -50,9 +50,12 @@ interface ExpenseBreakdownProps {
   postcode: string;
   city: string;
   workplacePostcode: string;
+  hasHousing: boolean;
+  hasRoommates: boolean;
+  numRoommates: number;
 }
 
-const ExpenseBreakdown = ({ income, postcode, city, workplacePostcode }: ExpenseBreakdownProps) => {
+const ExpenseBreakdown = ({ income, postcode, city, workplacePostcode, hasHousing, hasRoommates, numRoommates }: ExpenseBreakdownProps) => {
   // Calculate city-based multipliers
   const getCityMultiplier = (city: string) => {
     const cityLower = city.toLowerCase();
@@ -88,7 +91,77 @@ const ExpenseBreakdown = ({ income, postcode, city, workplacePostcode }: Expense
   
   const distanceMultiplier = calculateDistanceMultiplier(postcode, workplacePostcode);
 
+  // Tax calculations (UK tax bands for 2024/25)
+  const annualIncome = income * 12;
+  let annualTax = 0;
+  if (annualIncome > 12570) {
+    const basicRateIncome = Math.min(annualIncome - 12570, 37700);
+    annualTax += basicRateIncome * 0.2;
+    if (annualIncome > 50270) {
+      const higherRateIncome = Math.min(annualIncome - 50270, 75000);
+      annualTax += higherRateIncome * 0.4;
+      if (annualIncome > 125270) {
+        annualTax += (annualIncome - 125270) * 0.45;
+      }
+    }
+  }
+  const monthlyTax = annualTax / 12;
+  
+  // National Insurance calculations
+  const monthlyNI = income > 1048 ? (Math.min(income, 4189) - 1048) * 0.12 + 
+                   (income > 4189 ? (income - 4189) * 0.02 : 0) : 0;
+  
+  // Housing calculations
+  let housingAmount = 0;
+  if (hasHousing) {
+    const housingCost = Math.min(income * 0.35 * cityMultiplier, cityMultiplier > 1.3 ? 1200 : 800);
+    const totalRoommates = hasRoommates ? numRoommates + 1 : 1;
+    housingAmount = housingCost / totalRoommates;
+  }
+
   const expenses: ExpenseItem[] = [
+    ...(monthlyTax > 0 || monthlyNI > 0 ? [{
+      category: "Taxes & National Insurance",
+      amount: Math.round(monthlyTax + monthlyNI),
+      percentage: Math.round(((monthlyTax + monthlyNI) / income) * 100),
+      icon: <Building className="h-5 w-5 text-destructive" />,
+      description: "UK income tax and National Insurance contributions",
+      subExpenses: [
+        ...(monthlyTax > 0 ? [{
+          name: "Income Tax",
+          amount: Math.round(monthlyTax),
+          description: "UK income tax based on current tax bands",
+          icon: "💷"
+        }] : []),
+        ...(monthlyNI > 0 ? [{
+          name: "National Insurance",
+          amount: Math.round(monthlyNI),
+          description: "Class 1 National Insurance contributions",
+          icon: "🛡️"
+        }] : [])
+      ]
+    }] : []),
+    ...(hasHousing ? [{
+      category: "Housing",
+      amount: Math.round(housingAmount),
+      percentage: Math.round((housingAmount / income) * 100),
+      icon: <Home className="h-5 w-5 text-accent" />,
+      description: hasRoommates ? `Rent split between ${numRoommates + 1} people` : "Monthly rent and housing costs",
+      subExpenses: [
+        {
+          name: hasRoommates ? `Rent (split ${numRoommates + 1} ways)` : "Monthly Rent",
+          amount: Math.round(housingAmount * 0.85),
+          description: hasRoommates ? `Your share of £${Math.round(housingAmount * (numRoommates + 1) * 0.85)} total rent` : "Monthly rent payment",
+          icon: "🏠"
+        },
+        {
+          name: "Utilities & Bills",
+          amount: Math.round(housingAmount * 0.15),
+          description: hasRoommates ? "Your share of electricity, gas, water, internet" : "Electricity, gas, water, internet",
+          icon: "⚡"
+        }
+      ]
+    }] : []),
     {
       category: "Transport",
       amount: Math.round(Math.min(income * 0.15 * distanceMultiplier, 350)),
