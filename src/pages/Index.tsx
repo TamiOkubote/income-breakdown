@@ -15,6 +15,8 @@ interface FormData {
   workplaceCity: string;
   income: number;
   hasHousing: boolean;
+  knowsRent: boolean;
+  customRent: number;
   hasRoommates: boolean;
   numRoommates: number;
 }
@@ -155,6 +157,8 @@ const Index = () => {
                   city={formData.city}
                   workplacePostcode={formData.workplacePostcode}
                   hasHousing={formData.hasHousing}
+                  knowsRent={formData.knowsRent}
+                  customRent={formData.customRent}
                   hasRoommates={formData.hasRoommates}
                   numRoommates={formData.numRoommates}
                 />

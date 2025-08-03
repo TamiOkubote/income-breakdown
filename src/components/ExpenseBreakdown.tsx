@@ -51,11 +51,13 @@ interface ExpenseBreakdownProps {
   city: string;
   workplacePostcode: string;
   hasHousing: boolean;
+  knowsRent: boolean;
+  customRent: number;
   hasRoommates: boolean;
   numRoommates: number;
 }
 
-const ExpenseBreakdown = ({ income, postcode, city, workplacePostcode, hasHousing, hasRoommates, numRoommates }: ExpenseBreakdownProps) => {
+const ExpenseBreakdown = ({ income, postcode, city, workplacePostcode, hasHousing, knowsRent, customRent, hasRoommates, numRoommates }: ExpenseBreakdownProps) => {
   // Calculate city-based multipliers
   const getCityMultiplier = (city: string) => {
     const cityLower = city.toLowerCase();
@@ -114,7 +116,12 @@ const ExpenseBreakdown = ({ income, postcode, city, workplacePostcode, hasHousin
   // Housing calculations
   let housingAmount = 0;
   if (hasHousing) {
-    const housingCost = Math.min(income * 0.35 * cityMultiplier, cityMultiplier > 1.3 ? 1200 : 800);
+    let housingCost;
+    if (knowsRent && customRent > 0) {
+      housingCost = customRent;
+    } else {
+      housingCost = Math.min(income * 0.35 * cityMultiplier, cityMultiplier > 1.3 ? 1200 : 800);
+    }
     const totalRoommates = hasRoommates ? numRoommates + 1 : 1;
     housingAmount = housingCost / totalRoommates;
   }

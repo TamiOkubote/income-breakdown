@@ -13,6 +13,8 @@ interface IncomeFormProps {
     workplaceCity: string; 
     income: number;
     hasHousing: boolean;
+    knowsRent: boolean;
+    customRent: number;
     hasRoommates: boolean;
     numRoommates: number;
   }) => void;
@@ -25,6 +27,8 @@ const IncomeForm = ({ onSubmit }: IncomeFormProps) => {
   const [workplaceCity, setWorkplaceCity] = useState("");
   const [income, setIncome] = useState("");
   const [hasHousing, setHasHousing] = useState<boolean | null>(null);
+  const [knowsRent, setKnowsRent] = useState<boolean | null>(null);
+  const [customRent, setCustomRent] = useState("");
   const [hasRoommates, setHasRoommates] = useState<boolean | null>(null);
   const [numRoommates, setNumRoommates] = useState("");
 
@@ -32,7 +36,8 @@ const IncomeForm = ({ onSubmit }: IncomeFormProps) => {
     e.preventDefault();
     const isFormValid = postcode && city && workplacePostcode && workplaceCity && income && 
                        hasHousing !== null && 
-                       (hasHousing === false || (hasRoommates !== null && 
+                       (hasHousing === false || (knowsRent !== null && 
+                       (knowsRent === false || customRent) && hasRoommates !== null && 
                        (hasRoommates === false || numRoommates)));
     
     if (isFormValid) {
@@ -43,6 +48,8 @@ const IncomeForm = ({ onSubmit }: IncomeFormProps) => {
         workplaceCity, 
         income: parseFloat(income),
         hasHousing: hasHousing!,
+        knowsRent: knowsRent || false,
+        customRent: parseFloat(customRent) || 0,
         hasRoommates: hasRoommates || false,
         numRoommates: parseInt(numRoommates) || 0
       });
@@ -152,6 +159,8 @@ const IncomeForm = ({ onSubmit }: IncomeFormProps) => {
                   type="button"
                   onClick={() => {
                     setHasHousing(true);
+                    setKnowsRent(null);
+                    setCustomRent("");
                     setHasRoommates(null);
                     setNumRoommates("");
                   }}
@@ -167,6 +176,8 @@ const IncomeForm = ({ onSubmit }: IncomeFormProps) => {
                   type="button"
                   onClick={() => {
                     setHasHousing(false);
+                    setKnowsRent(null);
+                    setCustomRent("");
                     setHasRoommates(null);
                     setNumRoommates("");
                   }}
@@ -182,6 +193,65 @@ const IncomeForm = ({ onSubmit }: IncomeFormProps) => {
             </div>
 
             {hasHousing && (
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Do you know what the rent will be?</Label>
+                <div className="flex gap-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setKnowsRent(true);
+                      setCustomRent("");
+                    }}
+                    className={`px-4 py-2 rounded-md border transition-colors ${
+                      knowsRent === true 
+                        ? 'bg-primary text-primary-foreground border-primary' 
+                        : 'border-border hover:bg-muted'
+                    }`}
+                  >
+                    Yes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setKnowsRent(false);
+                      setCustomRent("");
+                    }}
+                    className={`px-4 py-2 rounded-md border transition-colors ${
+                      knowsRent === false 
+                        ? 'bg-primary text-primary-foreground border-primary' 
+                        : 'border-border hover:bg-muted'
+                    }`}
+                  >
+                    No
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {hasHousing && knowsRent && (
+              <div className="space-y-2">
+                <Label htmlFor="custom-rent" className="text-sm font-medium flex items-center gap-2">
+                  <PoundSterling className="h-4 w-4 text-primary" />
+                  Monthly Rent
+                </Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">£</span>
+                  <Input
+                    id="custom-rent"
+                    type="number"
+                    placeholder="800"
+                    value={customRent}
+                    onChange={(e) => setCustomRent(e.target.value)}
+                    className="h-12 pl-8 text-lg font-semibold"
+                    min="0"
+                    step="0.01"
+                    required
+                  />
+                </div>
+              </div>
+            )}
+
+            {hasHousing && knowsRent !== null && (
               <div className="space-y-3">
                 <Label className="text-sm font-medium">Will you have roommates?</Label>
                 <div className="flex gap-4">
@@ -217,7 +287,7 @@ const IncomeForm = ({ onSubmit }: IncomeFormProps) => {
               </div>
             )}
 
-            {hasHousing && hasRoommates && (
+            {hasHousing && knowsRent !== null && hasRoommates && (
               <div className="space-y-2">
                 <Label htmlFor="num-roommates" className="text-sm font-medium">
                   How many roommates?
@@ -241,8 +311,10 @@ const IncomeForm = ({ onSubmit }: IncomeFormProps) => {
             type="submit" 
             className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity"
             disabled={!postcode || !city || !workplacePostcode || !workplaceCity || !income || 
-                     hasHousing === null || (hasHousing && hasRoommates === null) || 
-                     (hasHousing && hasRoommates && !numRoommates)}
+                     hasHousing === null || (hasHousing && knowsRent === null) || 
+                     (hasHousing && knowsRent && !customRent) || 
+                     (hasHousing && knowsRent !== null && hasRoommates === null) || 
+                     (hasHousing && knowsRent !== null && hasRoommates && !numRoommates)}
           >
             Analyze My Finances
           </Button>
