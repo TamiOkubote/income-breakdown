@@ -378,6 +378,9 @@ const ExpenseBreakdown = ({ income, postcode, city, workplacePostcode, hasHousin
     }
   ];
 
+  // Sort expenses by amount in descending order (largest to smallest)
+  const sortedExpenses = [...expenses].sort((a, b) => b.amount - a.amount);
+  
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
   const remainingIncome = income - totalExpenses;
 
@@ -394,7 +397,7 @@ const ExpenseBreakdown = ({ income, postcode, city, workplacePostcode, hasHousin
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
-          {expenses.map((expense, index) => (
+          {sortedExpenses.map((expense, index) => (
             <Collapsible key={index} className="space-y-2">
               <CollapsibleTrigger className="w-full hover:bg-muted/50 p-2 rounded-lg transition-colors">
                 <div className="flex items-center justify-between">

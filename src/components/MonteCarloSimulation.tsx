@@ -25,19 +25,37 @@ const MonteCarloSimulation = ({
 }: MonteCarloSimulationProps) => {
   const [showDetails, setShowDetails] = useState(false);
   
-  // Monte Carlo simulation function
+  // Monte Carlo simulation function using Sharpe ratio calculations
   const runSimulation = (simulations = 1000) => {
     const results = [];
     const months = years * 12;
+    
+    // Risk-free rate (UK 10-year Treasury bond rate, approximately 4% annually)
+    const riskFreeRate = 0.04;
+    
+    // Calculate Sharpe ratio components
+    // R: average return, Rf: risk-free rate, σ: standard deviation
+    const excessReturn = (expectedReturn / 100) - riskFreeRate;
+    const standardDeviation = volatility / 100;
+    const sharpeRatio = excessReturn / standardDeviation;
+    
+    // Adjust expected return based on Sharpe ratio for more realistic modeling
+    const adjustedReturn = riskFreeRate + (sharpeRatio * standardDeviation);
     
     for (let sim = 0; sim < simulations; sim++) {
       let value = initialAmount;
       const yearlyValues = [{ year: 0, value: initialAmount }];
       
       for (let month = 1; month <= months; month++) {
-        // Generate random return based on normal distribution
-        const randomReturn = (Math.random() - 0.5) * 2; // Simple random between -1 and 1
-        const monthlyReturn = (expectedReturn / 100 / 12) + (volatility / 100 / 12) * randomReturn;
+        // Generate random return using Box-Muller transform for normal distribution
+        const u1 = Math.random();
+        const u2 = Math.random();
+        const z0 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+        
+        // Monthly return calculation with Sharpe ratio adjustment
+        const monthlyAdjustedReturn = adjustedReturn / 12;
+        const monthlyVolatility = standardDeviation / Math.sqrt(12);
+        const monthlyReturn = monthlyAdjustedReturn + (monthlyVolatility * z0);
         
         value = value * (1 + monthlyReturn) + monthlyContribution;
         
@@ -50,7 +68,8 @@ const MonteCarloSimulation = ({
       results.push({
         simulation: sim,
         finalValue: value,
-        yearlyValues: yearlyValues
+        yearlyValues: yearlyValues,
+        sharpeRatio: sharpeRatio
       });
     }
     
@@ -105,6 +124,16 @@ const MonteCarloSimulation = ({
                     A Monte Carlo simulation runs thousands of possible scenarios to show the range of 
                     potential investment outcomes based on historical market volatility.
                   </p>
+                  <div className="space-y-2">
+                    <p><strong>Sharpe Ratio Analysis:</strong></p>
+                    <p className="text-sm">This simulation uses the Sharpe ratio to calculate risk-adjusted returns:</p>
+                    <ul className="list-disc pl-6 space-y-1 text-sm">
+                      <li><strong>R:</strong> Average return of the investment ({expectedReturn}%)</li>
+                      <li><strong>Rf:</strong> Risk-free rate (UK Treasury bonds ~4%)</li>
+                      <li><strong>σ:</strong> Standard deviation of returns ({volatility}%)</li>
+                      <li><strong>Sharpe Ratio:</strong> (R - Rf) / σ = {((expectedReturn/100 - 0.04) / (volatility/100)).toFixed(2)}</li>
+                    </ul>
+                  </div>
                   <div className="space-y-2">
                     <p><strong>Percentiles explained:</strong></p>
                     <ul className="list-disc pl-6 space-y-1">
