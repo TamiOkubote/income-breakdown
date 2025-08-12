@@ -26,7 +26,8 @@ import {
   Users,
   Building,
   Bed,
-  Hammer
+  Hammer,
+  TrendingUp
 } from "lucide-react";
 
 interface SubExpense {
@@ -92,6 +93,19 @@ const ExpenseBreakdown = ({ income, postcode, city, workplacePostcode, hasHousin
   };
   
   const distanceMultiplier = calculateDistanceMultiplier(postcode, workplacePostcode);
+
+  // Inflation adjustments (UK inflation rate ~2.5% annually)
+  const annualInflationRate = 0.025;
+  const monthlyInflationRate = annualInflationRate / 12;
+  
+  // Track which expenses are affected by inflation
+  const inflationAffectedExpenses = [
+    'Housing', 'Transport', 'Car Costs', 'Shopping', 'Outings & Social', 'Vacations'
+  ];
+  
+  const applyInflation = (amount: number, isAffected: boolean = true) => {
+    return isAffected ? amount * (1 + annualInflationRate) : amount;
+  };
 
   // Tax calculations (UK tax bands for 2024/25)
   const annualIncome = income * 12;
@@ -171,10 +185,10 @@ const ExpenseBreakdown = ({ income, postcode, city, workplacePostcode, hasHousin
     }] : []),
     {
       category: "Transport",
-      amount: Math.round(Math.min(income * 0.15 * distanceMultiplier, 350)),
+      amount: Math.round(applyInflation(Math.min(income * 0.15 * distanceMultiplier, 350))),
       percentage: Math.min(15 * distanceMultiplier, 25),
       icon: <MapPin className="h-5 w-5 text-primary" />,
-      description: "Public transport, cycling, occasional taxi",
+      description: "Public transport, cycling, occasional taxi (affected by inflation)",
       subExpenses: [
         {
           name: "Monthly Oyster Card",
@@ -198,10 +212,10 @@ const ExpenseBreakdown = ({ income, postcode, city, workplacePostcode, hasHousin
     },
     {
       category: "Car Costs",
-      amount: Math.round(Math.min(income * 0.12 * cityMultiplier, 280)),
+      amount: Math.round(applyInflation(Math.min(income * 0.12 * cityMultiplier, 280))),
       percentage: Math.min(12 * cityMultiplier, 28),
       icon: <Car className="h-5 w-5 text-expense-red" />,
-      description: "Fuel, insurance, maintenance, parking",
+      description: "Fuel, insurance, maintenance, parking (affected by inflation)",
       subExpenses: [
         {
           name: "Fuel",
@@ -264,10 +278,10 @@ const ExpenseBreakdown = ({ income, postcode, city, workplacePostcode, hasHousin
     },
     {
       category: "Shopping",
-      amount: Math.round(Math.min(income * 0.18 * cityMultiplier, Math.max(income * 0.12, 180))),
+      amount: Math.round(applyInflation(Math.min(income * 0.18 * cityMultiplier, Math.max(income * 0.12, 180)))),
       percentage: Math.min(18 * cityMultiplier, 25),
       icon: <ShoppingCart className="h-5 w-5 text-finance-green" />,
-      description: "Groceries, clothing, personal items",
+      description: "Groceries, clothing, personal items (affected by inflation)",
       subExpenses: [
         {
           name: "Groceries",
@@ -297,10 +311,10 @@ const ExpenseBreakdown = ({ income, postcode, city, workplacePostcode, hasHousin
     },
     {
       category: "Outings & Social",
-      amount: Math.round(Math.min(income * 0.12 * cityMultiplier, cityMultiplier > 1.3 ? 300 : 180)),
+      amount: Math.round(applyInflation(Math.min(income * 0.12 * cityMultiplier, cityMultiplier > 1.3 ? 300 : 180))),
       percentage: Math.min(12 * cityMultiplier, cityMultiplier > 1.3 ? 20 : 15),
       icon: <Coffee className="h-5 w-5 text-investment-purple" />,
-      description: "Restaurants, bars, events, socializing",
+      description: "Restaurants, bars, events, socializing (affected by inflation)",
       subExpenses: [
         {
           name: "Dining Out",
@@ -324,10 +338,10 @@ const ExpenseBreakdown = ({ income, postcode, city, workplacePostcode, hasHousin
     },
     {
       category: "Vacations",
-      amount: Math.round(Math.min(income * 0.05, 150)),
+      amount: Math.round(applyInflation(Math.min(income * 0.05, 150))),
       percentage: Math.min((Math.min(income * 0.05, 150) / income) * 100, 5),
       icon: <Plane className="h-5 w-5 text-accent" />,
-      description: "Holidays, weekend trips, travel",
+      description: "Holidays, weekend trips, travel (affected by inflation)",
       subExpenses: [
         {
           name: "Annual Holiday",
@@ -431,6 +445,27 @@ const ExpenseBreakdown = ({ income, postcode, city, workplacePostcode, hasHousin
             </Collapsible>
           ))}
           
+          {/* Inflation Impact Summary */}
+          <div className="mt-6 p-4 bg-orange-50 rounded-lg border border-orange-200">
+            <h4 className="font-semibold text-orange-800 mb-2 flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" />
+              Inflation Impact Summary
+            </h4>
+            <p className="text-sm text-orange-700 mb-3">
+              The following expenses are affected by UK inflation (~2.5% annually):
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
+              {inflationAffectedExpenses.map((expense, index) => (
+                <Badge key={index} variant="secondary" className="text-orange-700 bg-orange-100">
+                  {expense}
+                </Badge>
+              ))}
+            </div>
+            <p className="text-xs text-orange-600 mt-3">
+              These costs typically increase annually, so budget accordingly for future years.
+            </p>
+          </div>
+
           <div className="mt-6 pt-4 border-t border-border">
             <div className="flex justify-between items-center text-lg font-bold">
               <span>Total Expenses:</span>

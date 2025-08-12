@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import MonteCarloSimulation from "./MonteCarloSimulation";
+import TradingStrategies from "./TradingStrategies";
 
 interface InvestmentStrategiesProps {
   remainingIncome: number;
@@ -556,6 +557,11 @@ const InvestmentStrategies = ({ remainingIncome }: InvestmentStrategiesProps) =>
             </TabsContent>
           ))}
         </Tabs>
+        
+        {/* Trading Strategies Section */}
+        <div className="mt-8">
+          <TradingStrategies remainingIncome={remainingIncome} />
+        </div>
       </CardContent>
     </Card>
   );
