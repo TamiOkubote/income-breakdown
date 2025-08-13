@@ -46,6 +46,18 @@ interface ExpenseItem {
   subExpenses: SubExpense[];
 }
 
+interface TaxLoophole {
+  id: string;
+  title: string;
+  description: string;
+  savings: number;
+  applicableExpenses: string[];
+  requirements: string[];
+  risks: string[];
+  icon: React.ReactNode;
+  category: 'pensions' | 'isa' | 'business' | 'property' | 'education' | 'other';
+}
+
 interface ExpenseBreakdownProps {
   income: number;
   postcode: string;
@@ -56,9 +68,10 @@ interface ExpenseBreakdownProps {
   customRent: number;
   hasRoommates: boolean;
   numRoommates: number;
+  appliedLoopholes?: TaxLoophole[];
 }
 
-const ExpenseBreakdown = ({ income, postcode, city, workplacePostcode, hasHousing, knowsRent, customRent, hasRoommates, numRoommates }: ExpenseBreakdownProps) => {
+const ExpenseBreakdown = ({ income, postcode, city, workplacePostcode, hasHousing, knowsRent, customRent, hasRoommates, numRoommates, appliedLoopholes = [] }: ExpenseBreakdownProps) => {
   // Calculate city-based multipliers
   const getCityMultiplier = (city: string) => {
     const cityLower = city.toLowerCase();
@@ -392,10 +405,32 @@ const ExpenseBreakdown = ({ income, postcode, city, workplacePostcode, hasHousin
     }
   ];
 
+  // Apply loophole deductions to expenses
+  const getLoopholeDeductions = (expenseCategory: string) => {
+    return appliedLoopholes.filter(loophole => 
+      loophole.applicableExpenses.includes(expenseCategory)
+    );
+  };
+
+  const applyLoopholeDeductions = (expense: ExpenseItem) => {
+    const deductions = getLoopholeDeductions(expense.category);
+    const totalDeduction = deductions.reduce((sum, loophole) => sum + loophole.savings, 0);
+    
+    return {
+      ...expense,
+      originalAmount: expense.amount,
+      amount: Math.max(0, expense.amount - totalDeduction),
+      deductions,
+      totalDeduction
+    };
+  };
+
+  const expensesWithDeductions = expenses.map(applyLoopholeDeductions);
+
   // Sort expenses by amount in descending order (largest to smallest)
-  const sortedExpenses = [...expenses].sort((a, b) => b.amount - a.amount);
+  const sortedExpenses = [...expensesWithDeductions].sort((a, b) => b.amount - a.amount);
   
-  const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+  const totalExpenses = expensesWithDeductions.reduce((sum, expense) => sum + expense.amount, 0);
   const remainingIncome = income - totalExpenses;
 
   return (
@@ -420,10 +455,33 @@ const ExpenseBreakdown = ({ income, postcode, city, workplacePostcode, hasHousin
                     <span className="font-medium">{expense.category}</span>
                     <ChevronDown className="h-4 w-4 text-muted-foreground" />
                   </div>
-                  <span className="font-bold text-lg">£{expense.amount}</span>
+                  <div className="flex items-center gap-2">
+                    {expense.totalDeduction > 0 && (
+                      <div className="flex items-center gap-1">
+                        <span className="text-sm line-through text-muted-foreground">£{expense.originalAmount}</span>
+                        <Badge variant="secondary" className="bg-green-100 text-green-700 border-green-300">
+                          -£{expense.totalDeduction}
+                        </Badge>
+                      </div>
+                    )}
+                    <span className="font-bold text-lg">£{expense.amount}</span>
+                  </div>
                 </div>
-                <Progress value={expense.percentage} className="h-2 mt-2" />
+                {expense.totalDeduction > 0 && (
+                  <div className="flex items-center gap-2 mt-1">
+                    <Progress value={Math.max(0, (expense.originalAmount - expense.totalDeduction) / income * 100)} className="h-2 flex-1" />
+                    <Progress value={expense.totalDeduction / income * 100} className="h-2 w-16 bg-green-200" />
+                  </div>
+                )}
+                {expense.totalDeduction === 0 && (
+                  <Progress value={expense.percentage} className="h-2 mt-2" />
+                )}
                 <p className="text-xs text-muted-foreground text-left mt-1">{expense.description}</p>
+                {expense.deductions.length > 0 && (
+                  <div className="text-xs text-green-700 text-left mt-1">
+                    Tax optimization applied: {expense.deductions.map(d => d.title).join(', ')}
+                  </div>
+                )}
               </CollapsibleTrigger>
               
               <CollapsibleContent className="space-y-2 ml-4 border-l-2 border-muted pl-4">

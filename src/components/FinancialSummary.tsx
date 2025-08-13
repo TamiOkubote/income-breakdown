@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import TaxLoopholes from "@/components/TaxLoopholes";
 import { 
   PoundSterling, 
   TrendingUp, 
@@ -10,13 +11,27 @@ import {
   CheckCircle
 } from "lucide-react";
 
+interface TaxLoophole {
+  id: string;
+  title: string;
+  description: string;
+  savings: number;
+  applicableExpenses: string[];
+  requirements: string[];
+  risks: string[];
+  icon: React.ReactNode;
+  category: 'pensions' | 'isa' | 'business' | 'property' | 'education' | 'other';
+}
+
 interface FinancialSummaryProps {
   income: number;
   totalExpenses: number;
   remainingIncome: number;
+  onApplyLoopholes: (selectedLoopholes: TaxLoophole[]) => void;
+  appliedLoopholes: TaxLoophole[];
 }
 
-const FinancialSummary = ({ income, totalExpenses, remainingIncome }: FinancialSummaryProps) => {
+const FinancialSummary = ({ income, totalExpenses, remainingIncome, onApplyLoopholes, appliedLoopholes }: FinancialSummaryProps) => {
   const savingsRate = (remainingIncome / income) * 100;
   const expenseRate = (totalExpenses / income) * 100;
 
@@ -84,7 +99,7 @@ const FinancialSummary = ({ income, totalExpenses, remainingIncome }: FinancialS
           </Badge>
         </div>
 
-        <div className="text-sm text-muted-foreground space-y-2">
+        <div className="text-sm text-muted-foreground space-y-3">
           <p className="font-medium">Recommendations:</p>
           <ul className="space-y-1">
             {savingsRate < 20 && (
@@ -96,6 +111,13 @@ const FinancialSummary = ({ income, totalExpenses, remainingIncome }: FinancialS
             <li>• Consider increasing income through side projects or skills development</li>
             <li>• Track expenses monthly to identify savings opportunities</li>
           </ul>
+          
+          <div className="pt-2">
+            <TaxLoopholes 
+              onApplyLoopholes={onApplyLoopholes}
+              appliedLoopholes={appliedLoopholes}
+            />
+          </div>
         </div>
       </CardContent>
     </Card>

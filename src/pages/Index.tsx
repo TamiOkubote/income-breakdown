@@ -8,6 +8,18 @@ import ExpenseBreakdown from "@/components/ExpenseBreakdown";
 import FinancialSummary from "@/components/FinancialSummary";
 import InvestmentStrategies from "@/components/InvestmentStrategies";
 
+interface TaxLoophole {
+  id: string;
+  title: string;
+  description: string;
+  savings: number;
+  applicableExpenses: string[];
+  requirements: string[];
+  risks: string[];
+  icon: React.ReactNode;
+  category: 'pensions' | 'isa' | 'business' | 'property' | 'education' | 'other';
+}
+
 interface FormData {
   postcode: string;
   city: string;
@@ -25,6 +37,7 @@ const Index = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData | null>(null);
   const [totalExpenses, setTotalExpenses] = useState(0);
+  const [appliedLoopholes, setAppliedLoopholes] = useState<TaxLoophole[]>([]);
 
   const calculateDistanceMultiplier = (homePostcode: string, workPostcode: string) => {
     // Simplified distance calculation based on postcode areas
@@ -115,6 +128,10 @@ const Index = () => {
 
   const remainingIncome = formData ? formData.income - totalExpenses : 0;
 
+  const handleApplyLoopholes = (selectedLoopholes: TaxLoophole[]) => {
+    setAppliedLoopholes(selectedLoopholes);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-secondary/30">
       <Header />
@@ -150,6 +167,8 @@ const Index = () => {
                   income={formData.income}
                   totalExpenses={totalExpenses}
                   remainingIncome={remainingIncome}
+                  onApplyLoopholes={handleApplyLoopholes}
+                  appliedLoopholes={appliedLoopholes}
                 />
                 <ExpenseBreakdown 
                   income={formData.income} 
@@ -161,6 +180,7 @@ const Index = () => {
                   customRent={formData.customRent}
                   hasRoommates={formData.hasRoommates}
                   numRoommates={formData.numRoommates}
+                  appliedLoopholes={appliedLoopholes}
                 />
               </div>
               
