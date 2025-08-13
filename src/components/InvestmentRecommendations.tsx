@@ -20,6 +20,7 @@ import {
   Calendar,
   AlertTriangle
 } from "lucide-react";
+import StockChart from "./StockChart";
 
 interface SubInvestment {
   name: string;
@@ -340,6 +341,11 @@ const InvestmentRecommendations = ({ remainingIncome }: InvestmentRecommendation
             </CollapsibleTrigger>
 
             <CollapsibleContent className="space-y-4 ml-4 border-l-2 border-muted pl-4">
+              {/* Stock Chart for S&P 500 and Stocks & ETFs */}
+              {(investment.name === "S&P 500 Index Fund" || investment.name === "Stocks & ETFs") && (
+                <StockChart investment={investment} />
+              )}
+              
               {/* Sub-investments */}
               <div className="space-y-3">
                 <h4 className="font-medium text-sm flex items-center gap-1">
