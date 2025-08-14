@@ -1,3 +1,4 @@
+
 import { Calculator, TrendingUp, Settings as SettingsIcon, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -14,8 +15,13 @@ const Header = () => {
               <Calculator className="h-8 w-8" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold">Mr. Budget</h1>
-              <p className="text-sm opacity-90">Smart budgeting for interns & apprentices</p>
+              <h1 className="text-2xl font-bold">
+                How to{" "}
+                <span className="text-purple-300 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)] animate-pulse">
+                  Budget
+                </span>
+              </h1>
+              <p className="text-sm opacity-90">Smart budgeting for interns, apprentices and graduates</p>
             </div>
           </div>
           

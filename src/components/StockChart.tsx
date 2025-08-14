@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -34,20 +35,60 @@ const StockChart = ({ investment }: StockChartProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activePeriod, setActivePeriod] = useState('1Y');
 
-  // Mock S&P 500 historical data
-  const sp500Data: StockData[] = [
-    { date: '2014', price: 2000 },
-    { date: '2015', price: 2050 },
-    { date: '2016', price: 2240 },
-    { date: '2017', price: 2670 },
-    { date: '2018', price: 2510 },
-    { date: '2019', price: 3230 },
-    { date: '2020', price: 3740 },
-    { date: '2021', price: 4770 },
-    { date: '2022', price: 3840 },
-    { date: '2023', price: 4770 },
-    { date: '2024', price: 5200 },
-  ];
+  // Generate realistic date ranges based on the current date
+  const generateDateRange = (period: string) => {
+    const endDate = new Date();
+    const dates = [];
+    
+    if (period === '1Y') {
+      // Last 12 months with monthly data points
+      for (let i = 11; i >= 0; i--) {
+        const date = new Date(endDate.getFullYear(), endDate.getMonth() - i, 1);
+        dates.push(date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' }));
+      }
+    } else if (period === '5Y') {
+      // Last 5 years with quarterly data points
+      for (let i = 19; i >= 0; i--) {
+        const date = new Date(endDate.getFullYear(), endDate.getMonth() - (i * 3), 1);
+        dates.push(date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' }));
+      }
+    } else if (period === '10Y') {
+      // Last 10 years with yearly data points
+      for (let i = 9; i >= 0; i--) {
+        const date = new Date(endDate.getFullYear() - i, endDate.getMonth(), 1);
+        dates.push(date.getFullYear().toString());
+      }
+    }
+    
+    return dates;
+  };
+
+  // Generate S&P 500 data with realistic volatility
+  const generateSP500Data = (period: string) => {
+    const dates = generateDateRange(period);
+    const basePrice = 4200; // Approximate current S&P 500 level
+    const data = [];
+    
+    // Different volatility patterns for different periods
+    const volatility = period === '1Y' ? 0.15 : period === '5Y' ? 0.12 : 0.08;
+    const trend = period === '1Y' ? 0.08 : period === '5Y' ? 0.10 : 0.12; // Annual growth rates
+    
+    for (let i = 0; i < dates.length; i++) {
+      const timeProgress = i / (dates.length - 1);
+      const trendComponent = basePrice * (1 + trend * timeProgress * (period === '1Y' ? 1 : period === '5Y' ? 5 : 10));
+      const randomComponent = (Math.random() - 0.5) * volatility * basePrice;
+      const cyclicalComponent = Math.sin(timeProgress * Math.PI * 2) * 0.05 * basePrice;
+      
+      data.push({
+        date: dates[i],
+        price: Math.round(trendComponent + randomComponent + cyclicalComponent)
+      });
+    }
+    
+    return data;
+  };
+
+  const sp500Data = generateSP500Data(activePeriod);
 
   // Mock top performing stocks data
   const topStocks: Stock[] = [
@@ -99,20 +140,26 @@ const StockChart = ({ investment }: StockChartProps) => {
     setSelectedStocks(selectedStocks.filter(s => s.symbol !== symbol));
   };
 
-  // Generate mock chart data combining S&P 500 and selected stocks
+  // Generate chart data combining S&P 500 and selected stocks
   const generateChartData = () => {
-    return sp500Data.map(dataPoint => {
+    return sp500Data.map((dataPoint, index) => {
       const chartPoint: any = {
         date: dataPoint.date,
         'S&P 500': dataPoint.price,
       };
 
       selectedStocks.forEach(stock => {
-        // Mock historical data for selected stocks based on their performance
+        // Generate realistic stock data based on performance
         const basePrice = 100;
-        const yearIndex = sp500Data.findIndex(d => d.date === dataPoint.date);
         const performance = getPerformanceByPeriod(stock, activePeriod) / 100;
-        chartPoint[stock.symbol] = Math.round(basePrice * Math.pow(1 + performance, yearIndex + 1));
+        const periodLength = activePeriod === '1Y' ? 1 : activePeriod === '5Y' ? 5 : 10;
+        const timeProgress = index / (sp500Data.length - 1);
+        
+        // Add some stock-specific volatility
+        const volatility = (Math.random() - 0.5) * 0.2 * basePrice;
+        const trendComponent = basePrice * Math.pow(1 + performance, timeProgress * periodLength);
+        
+        chartPoint[stock.symbol] = Math.round(trendComponent + volatility);
       });
 
       return chartPoint;
@@ -121,7 +168,27 @@ const StockChart = ({ investment }: StockChartProps) => {
 
   const chartData = generateChartData();
 
-  const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00ff00', '#ff00ff', '#00ffff', '#ffff00'];
+  const colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'];
+
+  // Custom tooltip for better formatting
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white border border-gray-300 rounded-lg shadow-lg p-3">
+          <p className="font-semibold text-gray-900">{label}</p>
+          {payload.map((entry: any, index: number) => (
+            <p key={index} style={{ color: entry.color }} className="text-sm">
+              {entry.dataKey === 'S&P 500' ? 
+                `${entry.dataKey}: ${entry.value}` : 
+                `${entry.dataKey}: $${entry.value}`
+              }
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-muted/20">
@@ -137,27 +204,39 @@ const StockChart = ({ investment }: StockChartProps) => {
       <CardContent className="space-y-6">
         <Tabs value={activePeriod} onValueChange={setActivePeriod}>
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="1Y">1 Year</TabsTrigger>
-            <TabsTrigger value="5Y">5 Years</TabsTrigger>
-            <TabsTrigger value="10Y">10 Years</TabsTrigger>
+            <TabsTrigger value="1Y">Last Year</TabsTrigger>
+            <TabsTrigger value="5Y">Last 5 Years</TabsTrigger>
+            <TabsTrigger value="10Y">Last 10 Years</TabsTrigger>
           </TabsList>
 
           <TabsContent value={activePeriod} className="space-y-6">
-            {/* Chart */}
-            <div className="h-80">
+            {/* Enhanced Chart with Google Finance-like styling */}
+            <div className="h-96 p-4 bg-white rounded-lg border">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
+                <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="1 1" stroke="#f0f0f0" strokeWidth={0.5} />
+                  <XAxis 
+                    dataKey="date" 
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: '#666' }}
+                    interval="preserveStartEnd"
+                  />
+                  <YAxis 
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: '#666' }}
+                    tickFormatter={(value) => value.toLocaleString()}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
                   <Legend />
                   <Line
                     type="monotone"
                     dataKey="S&P 500"
-                    stroke="#2563eb"
-                    strokeWidth={3}
-                    dot={{ fill: '#2563eb' }}
+                    stroke="#1a73e8"
+                    strokeWidth={2.5}
+                    dot={false}
+                    activeDot={{ r: 4, stroke: '#1a73e8', strokeWidth: 2, fill: '#fff' }}
                   />
                   {selectedStocks.map((stock, index) => (
                     <Line
@@ -166,7 +245,8 @@ const StockChart = ({ investment }: StockChartProps) => {
                       dataKey={stock.symbol}
                       stroke={colors[index % colors.length]}
                       strokeWidth={2}
-                      dot={{ fill: colors[index % colors.length] }}
+                      dot={false}
+                      activeDot={{ r: 3, stroke: colors[index % colors.length], strokeWidth: 2, fill: '#fff' }}
                     />
                   ))}
                 </LineChart>
