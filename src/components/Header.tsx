@@ -1,5 +1,5 @@
 
-import { Calculator, TrendingUp, Settings as SettingsIcon, MessageSquare } from "lucide-react";
+import { Calculator, TrendingUp, Settings as SettingsIcon, MessageSquare, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -40,6 +40,15 @@ const Header = () => {
               >
                 <MessageSquare className="h-4 w-4 mr-1" />
                 <span className="hidden sm:inline">Feedback</span>
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/analytics')}
+                className="text-primary-foreground hover:bg-white/10"
+              >
+                <BarChart3 className="h-4 w-4 mr-1" />
+                <span className="hidden sm:inline">Analytics</span>
               </Button>
               <Button
                 variant="ghost"

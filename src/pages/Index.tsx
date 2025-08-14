@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
+import { useAnalytics } from "@/hooks/useAnalytics";
 import IncomeForm from "@/components/IncomeForm";
 import ExpenseBreakdown from "@/components/ExpenseBreakdown";
 import FinancialSummary from "@/components/FinancialSummary";
@@ -35,9 +36,15 @@ interface FormData {
 
 const Index = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { trackPageView, activeUsers, totalVisitors } = useAnalytics();
   const [formData, setFormData] = useState<FormData | null>(null);
   const [totalExpenses, setTotalExpenses] = useState(0);
   const [appliedLoopholes, setAppliedLoopholes] = useState<TaxLoophole[]>([]);
+
+  useEffect(() => {
+    trackPageView(location.pathname);
+  }, [location.pathname, trackPageView]);
 
   const calculateDistanceMultiplier = (homePostcode: string, workPostcode: string) => {
     // Simplified distance calculation based on postcode areas
