@@ -34,6 +34,10 @@ const StockChart = ({ investment }: StockChartProps) => {
   const [selectedStocks, setSelectedStocks] = useState<Stock[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [activePeriod, setActivePeriod] = useState('1Y');
+  
+  // Determine chart behavior based on investment type
+  const isIndexFund = investment.name === "S&P 500 Index Fund";
+  const isStocksETFs = investment.name === "Stocks & ETFs";
 
   // Generate realistic date ranges based on the current date
   const generateDateRange = (period: string) => {
@@ -41,48 +45,88 @@ const StockChart = ({ investment }: StockChartProps) => {
     const dates = [];
     
     if (period === '1Y') {
-      // Last 12 months with monthly data points
-      for (let i = 11; i >= 0; i--) {
+      // Last 12 months with weekly data points for more detail
+      for (let i = 51; i >= 0; i--) {
+        const date = new Date(endDate.getTime() - (i * 7 * 24 * 60 * 60 * 1000));
+        dates.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+      }
+    } else if (period === '5Y') {
+      // Last 5 years with monthly data points
+      for (let i = 59; i >= 0; i--) {
         const date = new Date(endDate.getFullYear(), endDate.getMonth() - i, 1);
         dates.push(date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' }));
       }
-    } else if (period === '5Y') {
-      // Last 5 years with quarterly data points
-      for (let i = 19; i >= 0; i--) {
+    } else if (period === '10Y') {
+      // Last 10 years with quarterly data points
+      for (let i = 39; i >= 0; i--) {
         const date = new Date(endDate.getFullYear(), endDate.getMonth() - (i * 3), 1);
         dates.push(date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' }));
       }
-    } else if (period === '10Y') {
-      // Last 10 years with yearly data points
-      for (let i = 9; i >= 0; i--) {
-        const date = new Date(endDate.getFullYear() - i, endDate.getMonth(), 1);
-        dates.push(date.getFullYear().toString());
+    } else if (period === 'ALL') {
+      // S&P 500 since inception (1957) with yearly data points
+      const inceptionYear = 1957;
+      const currentYear = endDate.getFullYear();
+      for (let year = inceptionYear; year <= currentYear; year++) {
+        dates.push(year.toString());
       }
     }
     
     return dates;
   };
 
-  // Generate S&P 500 data with realistic volatility
+  // Generate S&P 500 data with realistic volatility and historical accuracy
   const generateSP500Data = (period: string) => {
     const dates = generateDateRange(period);
-    const basePrice = 4200; // Approximate current S&P 500 level
     const data = [];
     
-    // Different volatility patterns for different periods
-    const volatility = period === '1Y' ? 0.15 : period === '5Y' ? 0.12 : 0.08;
-    const trend = period === '1Y' ? 0.08 : period === '5Y' ? 0.10 : 0.12; // Annual growth rates
-    
-    for (let i = 0; i < dates.length; i++) {
-      const timeProgress = i / (dates.length - 1);
-      const trendComponent = basePrice * (1 + trend * timeProgress * (period === '1Y' ? 1 : period === '5Y' ? 5 : 10));
-      const randomComponent = (Math.random() - 0.5) * volatility * basePrice;
-      const cyclicalComponent = Math.sin(timeProgress * Math.PI * 2) * 0.05 * basePrice;
+    if (period === 'ALL') {
+      // Historical S&P 500 data simulation from 1957 to present
+      const startPrice = 40; // Approximate 1957 level
+      const currentPrice = 4200; // Current level
+      const totalYears = dates.length;
       
-      data.push({
-        date: dates[i],
-        price: Math.round(trendComponent + randomComponent + cyclicalComponent)
-      });
+      for (let i = 0; i < dates.length; i++) {
+        const yearProgress = i / (totalYears - 1);
+        // Apply compound growth with historical volatility and market crashes
+        let price = startPrice * Math.pow(currentPrice / startPrice, yearProgress);
+        
+        // Add historical market events simulation
+        const year = parseInt(dates[i]);
+        if (year >= 1973 && year <= 1974) price *= 0.85; // Oil crisis
+        if (year >= 1987 && year <= 1987) price *= 0.92; // Black Monday
+        if (year >= 2000 && year <= 2002) price *= 0.88; // Dot-com crash
+        if (year >= 2008 && year <= 2009) price *= 0.83; // Financial crisis
+        if (year >= 2020 && year <= 2020) price *= 0.95; // COVID crash and recovery
+        
+        // Add some realistic volatility
+        const randomFactor = 0.9 + (Math.random() * 0.2);
+        price *= randomFactor;
+        
+        data.push({
+          date: dates[i],
+          price: Math.round(price)
+        });
+      }
+    } else {
+      // More detailed data for shorter periods
+      const basePrice = 4200;
+      const volatility = period === '1Y' ? 0.02 : period === '5Y' ? 0.08 : 0.12;
+      const trend = period === '1Y' ? 0.08 : period === '5Y' ? 0.10 : 0.12;
+      
+      for (let i = 0; i < dates.length; i++) {
+        const timeProgress = i / (dates.length - 1);
+        const periodLength = period === '1Y' ? 1 : period === '5Y' ? 5 : 10;
+        
+        // More sophisticated price movement simulation
+        const trendComponent = basePrice * Math.pow(1 + trend, timeProgress * periodLength);
+        const volatilityComponent = (Math.sin(timeProgress * Math.PI * 8) + Math.cos(timeProgress * Math.PI * 12)) * volatility * basePrice;
+        const randomWalk = (Math.random() - 0.5) * volatility * basePrice * 0.5;
+        
+        data.push({
+          date: dates[i],
+          price: Math.round(trendComponent + volatilityComponent + randomWalk)
+        });
+      }
     }
     
     return data;
@@ -203,10 +247,11 @@ const StockChart = ({ investment }: StockChartProps) => {
       </CardHeader>
       <CardContent className="space-y-6">
         <Tabs value={activePeriod} onValueChange={setActivePeriod}>
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className={`grid w-full ${isIndexFund ? 'grid-cols-4' : 'grid-cols-3'}`}>
             <TabsTrigger value="1Y">Last Year</TabsTrigger>
             <TabsTrigger value="5Y">Last 5 Years</TabsTrigger>
             <TabsTrigger value="10Y">Last 10 Years</TabsTrigger>
+            {isIndexFund && <TabsTrigger value="ALL">Since Inception</TabsTrigger>}
           </TabsList>
 
           <TabsContent value={activePeriod} className="space-y-6">
@@ -230,15 +275,19 @@ const StockChart = ({ investment }: StockChartProps) => {
                   />
                   <Tooltip content={<CustomTooltip />} />
                   <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="S&P 500"
-                    stroke="#1a73e8"
-                    strokeWidth={2.5}
-                    dot={false}
-                    activeDot={{ r: 4, stroke: '#1a73e8', strokeWidth: 2, fill: '#fff' }}
-                  />
-                  {selectedStocks.map((stock, index) => (
+                  {/* Show S&P 500 only for Index Fund, hide for Stocks & ETFs */}
+                  {!isStocksETFs && (
+                    <Line
+                      type="monotone"
+                      dataKey="S&P 500"
+                      stroke="#1a73e8"
+                      strokeWidth={2.5}
+                      dot={false}
+                      activeDot={{ r: 4, stroke: '#1a73e8', strokeWidth: 2, fill: '#fff' }}
+                    />
+                  )}
+                  {/* Show individual stocks only for Stocks & ETFs, hide for Index Fund */}
+                  {!isIndexFund && selectedStocks.map((stock, index) => (
                     <Line
                       key={stock.symbol}
                       type="monotone"
@@ -253,8 +302,8 @@ const StockChart = ({ investment }: StockChartProps) => {
               </ResponsiveContainer>
             </div>
 
-            {/* Selected Stocks */}
-            {selectedStocks.length > 0 && (
+            {/* Selected Stocks - only show for Stocks & ETFs */}
+            {!isIndexFund && selectedStocks.length > 0 && (
               <div className="space-y-2">
                 <h4 className="font-medium">Selected Stocks ({selectedStocks.length}/50)</h4>
                 <div className="flex flex-wrap gap-2">
@@ -283,57 +332,81 @@ const StockChart = ({ investment }: StockChartProps) => {
               </div>
             )}
 
-            {/* Stock Search and Selection */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Search className="h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search stocks by name, symbol, or sector..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="flex-1"
-                />
-              </div>
+            {/* Stock Search and Selection - only show for Stocks & ETFs */}
+            {!isIndexFund && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Search className="h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search stocks by name, symbol, or sector..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="flex-1"
+                  />
+                </div>
 
-              <div className="grid gap-2 max-h-64 overflow-y-auto">
-                <h4 className="font-medium sticky top-0 bg-background py-2">
-                  Top Performing Stocks - {activePeriod} Period
-                </h4>
-                {filteredStocks.map((stock, index) => (
-                  <div
-                    key={stock.symbol}
-                    className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="text-center">
-                        <div className="text-sm font-medium text-muted-foreground">#{index + 1}</div>
+                <div className="grid gap-2 max-h-64 overflow-y-auto">
+                  <h4 className="font-medium sticky top-0 bg-background py-2">
+                    Top Performing Stocks - {activePeriod} Period
+                  </h4>
+                  {filteredStocks.map((stock, index) => (
+                    <div
+                      key={stock.symbol}
+                      className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="text-center">
+                          <div className="text-sm font-medium text-muted-foreground">#{index + 1}</div>
+                        </div>
+                        <div>
+                          <div className="font-medium">{stock.symbol}</div>
+                          <div className="text-sm text-muted-foreground">{stock.name}</div>
+                          <Badge variant="outline" className="text-xs">
+                            {stock.sector}
+                          </Badge>
+                        </div>
                       </div>
-                      <div>
-                        <div className="font-medium">{stock.symbol}</div>
-                        <div className="text-sm text-muted-foreground">{stock.name}</div>
-                        <Badge variant="outline" className="text-xs">
-                          {stock.sector}
-                        </Badge>
+                      <div className="text-right">
+                        <div className="text-finance-green font-medium">
+                          +{getPerformanceByPeriod(stock, activePeriod).toFixed(1)}%
+                        </div>
+                        <Button
+                          size="sm"
+                          onClick={() => addStock(stock)}
+                          disabled={selectedStocks.find(s => s.symbol === stock.symbol) !== undefined || selectedStocks.length >= 50}
+                          className="mt-1"
+                        >
+                          <Star className="h-3 w-3 mr-1" />
+                          Add
+                        </Button>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="text-finance-green font-medium">
-                        +{getPerformanceByPeriod(stock, activePeriod).toFixed(1)}%
-                      </div>
-                      <Button
-                        size="sm"
-                        onClick={() => addStock(stock)}
-                        disabled={selectedStocks.find(s => s.symbol === stock.symbol) !== undefined || selectedStocks.length >= 50}
-                        className="mt-1"
-                      >
-                        <Star className="h-3 w-3 mr-1" />
-                        Add
-                      </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* S&P 500 Info for Index Fund */}
+            {isIndexFund && (
+              <div className="space-y-4">
+                <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
+                  <h4 className="font-medium text-primary mb-2">S&P 500 Index Fund Performance</h4>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Track the performance of the 500 largest U.S. companies by market capitalization.
+                  </p>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">Current Period: </span>
+                      <span className="font-medium">{activePeriod === 'ALL' ? 'Since 1957' : activePeriod}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Historical Return: </span>
+                      <span className="font-medium text-finance-green">~10% annually</span>
                     </div>
                   </div>
-                ))}
+                </div>
               </div>
-            </div>
+            )}
           </TabsContent>
         </Tabs>
       </CardContent>
