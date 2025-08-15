@@ -14,7 +14,71 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      analytics_page_views: {
+        Row: {
+          created_at: string | null
+          id: string
+          page_path: string
+          session_id: string
+          viewed_at: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          page_path: string
+          session_id: string
+          viewed_at: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          page_path?: string
+          session_id?: string
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_page_views_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "analytics_sessions"
+            referencedColumns: ["session_id"]
+          },
+        ]
+      }
+      analytics_sessions: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          last_activity: string
+          page_path: string
+          session_id: string
+          started_at: string
+          user_agent: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_activity: string
+          page_path: string
+          session_id: string
+          started_at: string
+          user_agent: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_activity?: string
+          page_path?: string
+          session_id?: string
+          started_at?: string
+          user_agent?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
