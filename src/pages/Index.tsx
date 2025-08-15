@@ -42,6 +42,15 @@ const Index = () => {
   const [totalExpenses, setTotalExpenses] = useState(0);
   const [appliedLoopholes, setAppliedLoopholes] = useState<TaxLoophole[]>([]);
 
+  // Check if we're returning from countdown with results
+  useEffect(() => {
+    if (location.state?.formData && location.state?.showResults) {
+      processFormData(location.state.formData);
+      // Clear the state
+      navigate("/", { replace: true });
+    }
+  }, [location.state]);
+
   useEffect(() => {
     trackPageView(location.pathname);
   }, [location.pathname, trackPageView]);
@@ -84,6 +93,11 @@ const Index = () => {
   };
 
   const handleFormSubmit = (data: FormData) => {
+    // Navigate to countdown page instead of processing immediately
+    navigate("/countdown", { state: { formData: data } });
+  };
+
+  const processFormData = (data: FormData) => {
     setFormData(data);
     
     const cityMultiplier = getCityMultiplier(data.city);
