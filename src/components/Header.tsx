@@ -1,5 +1,5 @@
 
-import { Calculator, TrendingUp, Settings as SettingsIcon, MessageSquare, BarChart3 } from "lucide-react";
+import { Calculator, Settings as SettingsIcon, MessageSquare, BarChart3, ExternalLink, Github, Linkedin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -26,9 +26,44 @@ const Header = () => {
           </div>
           
           <div className="flex items-center space-x-4">
-            <div className="hidden md:flex items-center space-x-2">
-              <TrendingUp className="h-5 w-5" />
-              <span className="text-sm font-medium">Build Your Financial Future</span>
+            <div className="hidden md:flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
+                <a 
+                  href="https://portfolio-t-6hn.pages.dev/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                >
+                  <ExternalLink className="h-5 w-5" />
+                </a>
+                <a 
+                  href="https://www.linkedin.com/in/tami-okubote-8b3087281/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                >
+                  <Linkedin className="h-5 w-5" />
+                </a>
+                <a 
+                  href="https://github.com/TamiOkubote" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                >
+                  <Github className="h-5 w-5" />
+                </a>
+              </div>
+              <span className="text-sm font-medium">
+                Brought to fruition by{" "}
+                <a 
+                  href="https://www.linkedin.com/in/tami-okubote-8b3087281/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="underline hover:text-purple-300 transition-colors"
+                >
+                  Tami Okubote
+                </a>
+              </span>
             </div>
             
             <div className="flex items-center gap-2">
