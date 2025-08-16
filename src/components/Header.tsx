@@ -1,10 +1,11 @@
 
 import { Calculator, Settings as SettingsIcon, MessageSquare, BarChart3, ExternalLink, Github, Linkedin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Header = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   return (
     <header className="bg-gradient-to-r from-primary to-accent text-primary-foreground">
@@ -88,7 +89,7 @@ const Header = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => navigate('/settings')}
+                onClick={() => navigate('/settings', { state: { from: location.pathname } })}
                 className="text-primary-foreground hover:bg-white/10"
               >
                 <SettingsIcon className="h-4 w-4 mr-1" />

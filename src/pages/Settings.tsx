@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -22,6 +22,8 @@ interface SettingsData {
 
 const Settings = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const referrer = location.state?.from || '/';
   const [settings, setSettings] = useState<SettingsData>({
     darkMode: false,
     fontSize: 16,
@@ -120,7 +122,7 @@ const Settings = () => {
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
-                  onClick={() => navigate(-1)}
+                  onClick={() => navigate(referrer)}
                   className="flex items-center gap-2 text-primary hover:text-primary/80"
                 >
                   <ArrowLeft className="h-4 w-4" />
@@ -315,7 +317,7 @@ const Settings = () => {
             <div className="flex gap-2">
               <Button
                 variant="outline"
-                onClick={() => navigate(-1)}
+                onClick={() => navigate(referrer)}
                 disabled={hasChanges}
               >
                 Cancel
