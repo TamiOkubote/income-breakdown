@@ -19,7 +19,7 @@ import {
   DollarSign
 } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import MonteCarloSimulation from "./MonteCarloSimulation";
+import MonteCarloPhases from "./MonteCarloPhases";
 import TradingStrategies from "./TradingStrategies";
 
 interface InvestmentStrategiesProps {
@@ -462,15 +462,10 @@ const InvestmentStrategies = ({ remainingIncome }: InvestmentStrategiesProps) =>
                         </div>
                       </div>
 
-                      {/* Monte Carlo Simulation */}
-                      <MonteCarloSimulation
-                        initialAmount={100}
-                        monthlyContribution={remainingIncome}
-                        expectedReturn={parseFloat(phase.expectedReturn.replace('%', ''))}
-                        volatility={strategy.name === 'Conservative Approach' ? 8 : strategy.name === 'Balanced Growth' ? 12 : 18}
-                        years={parseInt(phase.timeframe.split(' ')[0]) || 5}
-                        strategy={`${strategy.name} - ${phase.phase}`}
-                      />
+                      {/* Monte Carlo Phases */}
+                      <div className="text-sm text-muted-foreground text-center py-4">
+                        Monte Carlo simulation phases are now displayed above in the main strategy view
+                      </div>
 
                       {/* Expected Return */}
                       <div className="p-3 rounded bg-primary/5 border border-primary/20">

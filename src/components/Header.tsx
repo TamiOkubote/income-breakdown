@@ -71,7 +71,7 @@ const Header = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => navigate('/feedback')}
+                onClick={() => navigate('/feedback', { state: { from: location.pathname } })}
                 className="text-primary-foreground hover:bg-white/10"
               >
                 <MessageSquare className="h-4 w-4 mr-1" />
@@ -80,7 +80,7 @@ const Header = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => navigate('/analytics')}
+                onClick={() => navigate('/analytics', { state: { from: location.pathname } })}
                 className="text-primary-foreground hover:bg-white/10"
               >
                 <BarChart3 className="h-4 w-4 mr-1" />
@@ -89,7 +89,7 @@ const Header = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => navigate('/congress-trades')}
+                onClick={() => navigate('/congress-trades', { state: { from: location.pathname } })}
                 className="text-primary-foreground hover:bg-white/10"
               >
                 <Users className="h-4 w-4 mr-1" />

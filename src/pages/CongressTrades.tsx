@@ -19,7 +19,7 @@ const congressMembers = [
     totalTrades: 156,
     totalValue: 25400000,
     averageReturn: 14.2,
-    avatar: "/placeholder.svg",
+    avatar: "https://upload.wikimedia.org/wikipedia/commons/5/54/Nancy_Pelosi_official_photo.jpg",
     recentTrades: [
       { symbol: "NVDA", action: "BUY", amount: 5000000, date: "2024-01-15", price: 850, currentPrice: 920, return: 8.2 },
       { symbol: "AAPL", action: "SELL", amount: 2500000, date: "2024-01-10", price: 185, currentPrice: 175, return: -5.4 },
@@ -37,7 +37,7 @@ const congressMembers = [
     totalTrades: 89,
     totalValue: 12300000,
     averageReturn: 11.8,
-    avatar: "/placeholder.svg",
+    avatar: "https://upload.wikimedia.org/wikipedia/commons/a/a6/Dan_Crenshaw%2C_official_portrait%2C_116th_Congress.jpg",
     recentTrades: [
       { symbol: "XOM", action: "BUY", amount: 1500000, date: "2024-01-12", price: 110, currentPrice: 118, return: 7.3 },
       { symbol: "CVX", action: "BUY", amount: 2200000, date: "2024-01-09", price: 155, currentPrice: 162, return: 4.5 },
@@ -53,7 +53,7 @@ const congressMembers = [
     totalTrades: 124,
     totalValue: 18700000,
     averageReturn: 9.6,
-    avatar: "/placeholder.svg",
+    avatar: "https://upload.wikimedia.org/wikipedia/commons/4/4e/Josh_Gottheimer%2C_official_portrait%2C_115th_Congress.jpg",
     recentTrades: [
       { symbol: "JPM", action: "BUY", amount: 2800000, date: "2024-01-14", price: 165, currentPrice: 172, return: 4.2 },
       { symbol: "BAC", action: "BUY", amount: 1900000, date: "2024-01-11", price: 34, currentPrice: 36, return: 5.9 },
@@ -69,7 +69,7 @@ const congressMembers = [
     totalTrades: 67,
     totalValue: 8900000,
     averageReturn: 7.3,
-    avatar: "/placeholder.svg",
+    avatar: "https://upload.wikimedia.org/wikipedia/commons/b/b4/Austin_Scott%2C_official_portrait%2C_116th_Congress.jpg",
     recentTrades: [
       { symbol: "KO", action: "BUY", amount: 1200000, date: "2024-01-13", price: 58, currentPrice: 61, return: 5.2 },
       { symbol: "PG", action: "BUY", amount: 1500000, date: "2024-01-08", price: 150, currentPrice: 155, return: 3.3 }
@@ -100,7 +100,7 @@ const CongressTrades = () => {
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
-                  onClick={() => navigate('/')}
+                  onClick={() => navigate(-1)}
                   className="flex items-center gap-2 text-primary hover:text-primary/80"
                 >
                   <ArrowLeft className="h-4 w-4" />
