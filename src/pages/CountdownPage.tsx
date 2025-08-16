@@ -39,7 +39,7 @@ const CountdownPage = () => {
   }, [navigate, formData]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+    <div className="min-h-screen bg-background">
       <Header />
       
       <div className="flex flex-col items-center justify-center min-h-screen pt-20 px-4">
@@ -47,8 +47,8 @@ const CountdownPage = () => {
           {/* First Text with Typing Animation */}
           <div className="h-12">
             {showFirstText && (
-              <h1 className="text-3xl md:text-4xl font-bold text-white typing-animation">
-                The portfolio was USP 1.
+              <h1 className="text-3xl md:text-4xl font-bold text-foreground typing-animation" style={{ textShadow: '0 0 20px hsl(var(--primary) / 0.5)' }}>
+                The portfolio was USP 1...
               </h1>
             )}
           </div>
@@ -56,8 +56,8 @@ const CountdownPage = () => {
           {/* Second Text with Typing Animation */}
           <div className="h-12 mt-8">
             {showSecondText && (
-              <h2 className="text-2xl md:text-3xl font-semibold text-purple-200 typing-animation">
-                Now, USP 2 is loading
+              <h2 className="text-2xl md:text-3xl font-semibold text-foreground typing-animation" style={{ textShadow: '0 0 20px hsl(var(--investment-purple) / 0.7)' }}>
+                ...and now, USP 2 is loading.
               </h2>
             )}
           </div>
