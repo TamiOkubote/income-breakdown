@@ -1,5 +1,5 @@
 
-import { Calculator, Settings as SettingsIcon, MessageSquare, BarChart3, ExternalLink, Github, Linkedin } from "lucide-react";
+import { Calculator, Settings as SettingsIcon, MessageSquare, BarChart3, ExternalLink, Github, Linkedin, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -85,6 +85,15 @@ const Header = () => {
               >
                 <BarChart3 className="h-4 w-4 mr-1" />
                 <span className="hidden sm:inline">Analytics</span>
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/congress-trades')}
+                className="text-primary-foreground hover:bg-white/10"
+              >
+                <Users className="h-4 w-4 mr-1" />
+                <span className="hidden sm:inline">Congress</span>
               </Button>
               <Button
                 variant="ghost"
