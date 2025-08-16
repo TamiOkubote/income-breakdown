@@ -68,10 +68,11 @@ interface ExpenseBreakdownProps {
   customRent: number;
   hasRoommates: boolean;
   numRoommates: number;
+  hasCar: boolean;
   appliedLoopholes?: TaxLoophole[];
 }
 
-const ExpenseBreakdown = ({ income, postcode, city, workplacePostcode, hasHousing, knowsRent, customRent, hasRoommates, numRoommates, appliedLoopholes = [] }: ExpenseBreakdownProps) => {
+const ExpenseBreakdown = ({ income, postcode, city, workplacePostcode, hasHousing, knowsRent, customRent, hasRoommates, numRoommates, hasCar, appliedLoopholes = [] }: ExpenseBreakdownProps) => {
   // Calculate city-based multipliers
   const getCityMultiplier = (city: string) => {
     const cityLower = city.toLowerCase();
@@ -202,92 +203,115 @@ const ExpenseBreakdown = ({ income, postcode, city, workplacePostcode, hasHousin
       percentage: Math.min(15 * distanceMultiplier, 25),
       icon: <MapPin className="h-5 w-5 text-primary" />,
       description: "Public transport, cycling, occasional taxi (affected by inflation)",
-      subExpenses: [
-        {
-          name: "Monthly Oyster Card",
-          amount: Math.round(Math.min(income * 0.08 * distanceMultiplier, 180)),
-          description: "Zones 1-3 unlimited travel (£156/month)",
-          icon: <Train className="h-4 w-4 text-primary" />
-        },
-        {
-          name: "Bus Travel",
-          amount: Math.round(Math.min(income * 0.04 * distanceMultiplier, 80)),
-          description: "Daily bus fares (£1.75 per journey)",
-          icon: <Bus className="h-4 w-4 text-primary" />
-        },
-        {
-          name: "Taxi/Uber",
-          amount: Math.round(Math.min(income * 0.03, 60)),
-          description: "Occasional rides and late-night transport",
-          icon: <Car className="h-4 w-4 text-primary" />
-        }
-      ]
+      subExpenses: (() => {
+        const totalTransport = Math.round(applyInflation(Math.min(income * 0.15 * distanceMultiplier, 350)));
+        const oysterAmount = Math.round(totalTransport * 0.55);
+        const busAmount = Math.round(totalTransport * 0.30);
+        const taxiAmount = totalTransport - oysterAmount - busAmount;
+        
+        return [
+          {
+            name: "Monthly Oyster Card",
+            amount: oysterAmount,
+            description: "Zones 1-3 unlimited travel (£156/month)",
+            icon: <Train className="h-4 w-4 text-primary" />
+          },
+          {
+            name: "Bus Travel",
+            amount: busAmount,
+            description: "Daily bus fares (£1.75 per journey)",
+            icon: <Bus className="h-4 w-4 text-primary" />
+          },
+          {
+            name: "Taxi/Uber",
+            amount: taxiAmount,
+            description: "Occasional rides and late-night transport",
+            icon: <Car className="h-4 w-4 text-primary" />
+          }
+        ];
+      })()
     },
-    {
+    ...(hasCar ? [{
       category: "Car Costs",
       amount: Math.round(applyInflation(Math.min(income * 0.12 * cityMultiplier, 280))),
       percentage: Math.min(12 * cityMultiplier, 28),
       icon: <Car className="h-5 w-5 text-expense-red" />,
       description: "Fuel, insurance, maintenance, parking (affected by inflation)",
-      subExpenses: [
-        {
-          name: "Fuel",
-          amount: Math.round(income * 0.05 * cityMultiplier),
-          description: "Petrol at £1.50/litre (£80-120/month)",
-          icon: <Fuel className="h-4 w-4 text-expense-red" />
-        },
-        {
-          name: "Insurance",
-          amount: Math.round(income * 0.04 * cityMultiplier),
-          description: "Young driver insurance (£80-150/month)",
-          icon: <Shield className="h-4 w-4 text-expense-red" />
-        },
-        {
-          name: "Parking",
-          amount: Math.round(income * 0.02 * cityMultiplier),
-          description: "Daily parking fees and permits",
-          icon: <Building className="h-4 w-4 text-expense-red" />
-        },
-        {
-          name: "Maintenance",
-          amount: Math.round(income * 0.01 * cityMultiplier),
-          description: "Servicing, MOT, repairs (£30-50/month)",
-          icon: <Wrench className="h-4 w-4 text-expense-red" />
-        }
-      ]
-    },
+      subExpenses: (() => {
+        const totalCar = Math.round(applyInflation(Math.min(income * 0.12 * cityMultiplier, 280)));
+        const fuelAmount = Math.round(totalCar * 0.42);
+        const insuranceAmount = Math.round(totalCar * 0.33);
+        const parkingAmount = Math.round(totalCar * 0.17);
+        const maintenanceAmount = totalCar - fuelAmount - insuranceAmount - parkingAmount;
+        
+        return [
+          {
+            name: "Fuel",
+            amount: fuelAmount,
+            description: "Petrol at £1.50/litre (£80-120/month)",
+            icon: <Fuel className="h-4 w-4 text-expense-red" />
+          },
+          {
+            name: "Insurance",
+            amount: insuranceAmount,
+            description: "Young driver insurance (£80-150/month)",
+            icon: <Shield className="h-4 w-4 text-expense-red" />
+          },
+          {
+            name: "Parking",
+            amount: parkingAmount,
+            description: "Daily parking fees and permits",
+            icon: <Building className="h-4 w-4 text-expense-red" />
+          },
+          {
+            name: "Maintenance",
+            amount: maintenanceAmount,
+            description: "Servicing, MOT, repairs (£30-50/month)",
+            icon: <Wrench className="h-4 w-4 text-expense-red" />
+          }
+        ];
+      })()
+    }] : []),
     {
       category: "Subscriptions",
       amount: Math.round(Math.min(income * 0.08, 80)),
       percentage: Math.min((Math.min(income * 0.08, 80) / income) * 100, 8),
       icon: <Smartphone className="h-5 w-5 text-warning" />,
       description: "Streaming, music, apps, cloud storage",
-      subExpenses: [
-        {
-          name: "Streaming Services",
-          amount: Math.round(Math.min(income * 0.04, 40)),
-          description: "Netflix, Disney+, Prime Video (£30-40/month)",
-          icon: <Tv className="h-4 w-4 text-warning" />
-        },
-        {
-          name: "Music & Audio",
-          amount: Math.round(Math.min(income * 0.02, 20)),
-          description: "Spotify, Apple Music (£10-15/month)",
-          icon: <Music className="h-4 w-4 text-warning" />
-        },
-        {
-          name: "Cloud Storage",
-          amount: Math.round(Math.min(income * 0.01, 10)),
-          description: "Google Drive, iCloud (£3-8/month)",
-          icon: <Cloud className="h-4 w-4 text-warning" />
-        },
-        {
-          name: "Apps & Software",
-          amount: Math.round(Math.min(income * 0.01, 10)),
-          description: "Adobe, productivity apps (£5-15/month)",
-          icon: <Smartphone className="h-4 w-4 text-warning" />
-        }
-      ]
+      subExpenses: (() => {
+        const totalSubs = Math.round(Math.min(income * 0.08, 80));
+        const streamingAmount = Math.round(totalSubs * 0.50);
+        const musicAmount = Math.round(totalSubs * 0.25);
+        const cloudAmount = Math.round(totalSubs * 0.13);
+        const appsAmount = totalSubs - streamingAmount - musicAmount - cloudAmount;
+        
+        return [
+          {
+            name: "Streaming Services",
+            amount: streamingAmount,
+            description: "Netflix, Disney+, Prime Video (£30-40/month)",
+            icon: <Tv className="h-4 w-4 text-warning" />
+          },
+          {
+            name: "Music & Audio",
+            amount: musicAmount,
+            description: "Spotify, Apple Music (£10-15/month)",
+            icon: <Music className="h-4 w-4 text-warning" />
+          },
+          {
+            name: "Cloud Storage",
+            amount: cloudAmount,
+            description: "Google Drive, iCloud (£3-8/month)",
+            icon: <Cloud className="h-4 w-4 text-warning" />
+          },
+          {
+            name: "Apps & Software",
+            amount: appsAmount,
+            description: "Adobe, productivity apps (£5-15/month)",
+            icon: <Smartphone className="h-4 w-4 text-warning" />
+          }
+        ];
+      })()
     },
     {
       category: "Shopping",
@@ -295,32 +319,40 @@ const ExpenseBreakdown = ({ income, postcode, city, workplacePostcode, hasHousin
       percentage: Math.min(18 * cityMultiplier, 25),
       icon: <ShoppingCart className="h-5 w-5 text-finance-green" />,
       description: "Groceries, clothing, personal items (affected by inflation)",
-      subExpenses: [
-        {
-          name: "Groceries",
-          amount: Math.round(income * 0.12),
-          description: "Weekly food shopping (£60-80/week)",
-          icon: <Utensils className="h-4 w-4 text-finance-green" />
-        },
-        {
-          name: "Clothing",
-          amount: Math.round(income * 0.05),
-          description: "Work attire and casual wear",
-          icon: <Shirt className="h-4 w-4 text-finance-green" />
-        },
-        {
-          name: "Personal Care",
-          amount: Math.round(income * 0.02),
-          description: "Toiletries, haircuts, healthcare",
-          icon: <Users className="h-4 w-4 text-finance-green" />
-        },
-        {
-          name: "Household Items",
-          amount: Math.round(income * 0.01),
-          description: "Cleaning supplies, home essentials",
-          icon: <Home className="h-4 w-4 text-finance-green" />
-        }
-      ]
+      subExpenses: (() => {
+        const totalShopping = Math.round(applyInflation(Math.min(income * 0.18 * cityMultiplier, Math.max(income * 0.12, 180))));
+        const groceriesAmount = Math.round(totalShopping * 0.67);
+        const clothingAmount = Math.round(totalShopping * 0.22);
+        const personalCareAmount = Math.round(totalShopping * 0.08);
+        const householdAmount = totalShopping - groceriesAmount - clothingAmount - personalCareAmount;
+        
+        return [
+          {
+            name: "Groceries",
+            amount: groceriesAmount,
+            description: "Weekly food shopping (£60-80/week)",
+            icon: <Utensils className="h-4 w-4 text-finance-green" />
+          },
+          {
+            name: "Clothing",
+            amount: clothingAmount,
+            description: "Work attire and casual wear",
+            icon: <Shirt className="h-4 w-4 text-finance-green" />
+          },
+          {
+            name: "Personal Care",
+            amount: personalCareAmount,
+            description: "Toiletries, haircuts, healthcare",
+            icon: <Users className="h-4 w-4 text-finance-green" />
+          },
+          {
+            name: "Household Items",
+            amount: householdAmount,
+            description: "Cleaning supplies, home essentials",
+            icon: <Home className="h-4 w-4 text-finance-green" />
+          }
+        ];
+      })()
     },
     {
       category: "Outings & Social",
@@ -328,26 +360,33 @@ const ExpenseBreakdown = ({ income, postcode, city, workplacePostcode, hasHousin
       percentage: Math.min(12 * cityMultiplier, cityMultiplier > 1.3 ? 20 : 15),
       icon: <Coffee className="h-5 w-5 text-investment-purple" />,
       description: "Restaurants, bars, events, socializing (affected by inflation)",
-      subExpenses: [
-        {
-          name: "Dining Out",
-          amount: Math.round(income * 0.06),
-          description: "Restaurants and takeaways (£15-25/meal)",
-          icon: <Utensils className="h-4 w-4 text-investment-purple" />
-        },
-        {
-          name: "Drinks & Bars",
-          amount: Math.round(income * 0.04),
-          description: "Social drinks and pub visits (£5-8/drink)",
-          icon: <Coffee className="h-4 w-4 text-investment-purple" />
-        },
-        {
-          name: "Events & Activities",
-          amount: Math.round(income * 0.02),
-          description: "Cinema, concerts, sports events",
-          icon: <Users className="h-4 w-4 text-investment-purple" />
-        }
-      ]
+      subExpenses: (() => {
+        const totalSocial = Math.round(applyInflation(Math.min(income * 0.12 * cityMultiplier, cityMultiplier > 1.3 ? 300 : 180)));
+        const diningAmount = Math.round(totalSocial * 0.50);
+        const drinksAmount = Math.round(totalSocial * 0.33);
+        const eventsAmount = totalSocial - diningAmount - drinksAmount;
+        
+        return [
+          {
+            name: "Dining Out",
+            amount: diningAmount,
+            description: "Restaurants and takeaways (£15-25/meal)",
+            icon: <Utensils className="h-4 w-4 text-investment-purple" />
+          },
+          {
+            name: "Drinks & Bars",
+            amount: drinksAmount,
+            description: "Social drinks and pub visits (£5-8/drink)",
+            icon: <Coffee className="h-4 w-4 text-investment-purple" />
+          },
+          {
+            name: "Events & Activities",
+            amount: eventsAmount,
+            description: "Cinema, concerts, sports events",
+            icon: <Users className="h-4 w-4 text-investment-purple" />
+          }
+        ];
+      })()
     },
     {
       category: "Vacations",
@@ -355,26 +394,33 @@ const ExpenseBreakdown = ({ income, postcode, city, workplacePostcode, hasHousin
       percentage: Math.min((Math.min(income * 0.05, 150) / income) * 100, 5),
       icon: <Plane className="h-5 w-5 text-accent" />,
       description: "Holidays, weekend trips, travel (affected by inflation)",
-      subExpenses: [
-        {
-          name: "Annual Holiday",
-          amount: Math.round(income * 0.03),
-          description: "One week abroad (£500-800 saved monthly)",
-          icon: <Plane className="h-4 w-4 text-accent" />
-        },
-        {
-          name: "Weekend Trips",
-          amount: Math.round(income * 0.015),
-          description: "UK city breaks and short trips",
-          icon: <Bed className="h-4 w-4 text-accent" />
-        },
-        {
-          name: "Travel Insurance",
-          amount: Math.round(income * 0.005),
-          description: "Annual travel insurance coverage",
-          icon: <Shield className="h-4 w-4 text-accent" />
-        }
-      ]
+      subExpenses: (() => {
+        const totalVacations = Math.round(applyInflation(Math.min(income * 0.05, 150)));
+        const holidayAmount = Math.round(totalVacations * 0.60);
+        const weekendAmount = Math.round(totalVacations * 0.30);
+        const insuranceAmount = totalVacations - holidayAmount - weekendAmount;
+        
+        return [
+          {
+            name: "Annual Holiday",
+            amount: holidayAmount,
+            description: "One week abroad (£500-800 saved monthly)",
+            icon: <Plane className="h-4 w-4 text-accent" />
+          },
+          {
+            name: "Weekend Trips",
+            amount: weekendAmount,
+            description: "UK city breaks and short trips",
+            icon: <Bed className="h-4 w-4 text-accent" />
+          },
+          {
+            name: "Travel Insurance",
+            amount: insuranceAmount,
+            description: "Annual travel insurance coverage",
+            icon: <Shield className="h-4 w-4 text-accent" />
+          }
+        ];
+      })()
     },
     {
       category: "Maintenance",
@@ -382,26 +428,33 @@ const ExpenseBreakdown = ({ income, postcode, city, workplacePostcode, hasHousin
       percentage: Math.min((Math.min(income * 0.03, 100) / income) * 100, 3),
       icon: <Wrench className="h-5 w-5 text-muted-foreground" />,
       description: "Repairs, replacements, emergency fund",
-      subExpenses: [
-        {
-          name: "Emergency Fund",
-          amount: Math.round(income * 0.02),
-          description: "Unexpected expenses and repairs",
-          icon: <Shield className="h-4 w-4 text-muted-foreground" />
-        },
-        {
-          name: "Equipment Replacement",
-          amount: Math.round(income * 0.008),
-          description: "Phone, laptop, electronics replacement",
-          icon: <Smartphone className="h-4 w-4 text-muted-foreground" />
-        },
-        {
-          name: "General Repairs",
-          amount: Math.round(income * 0.002),
-          description: "Home repairs and maintenance",
-          icon: <Hammer className="h-4 w-4 text-muted-foreground" />
-        }
-      ]
+      subExpenses: (() => {
+        const totalMaintenance = Math.round(Math.min(income * 0.03, 100));
+        const emergencyAmount = Math.round(totalMaintenance * 0.67);
+        const equipmentAmount = Math.round(totalMaintenance * 0.26);
+        const repairsAmount = totalMaintenance - emergencyAmount - equipmentAmount;
+        
+        return [
+          {
+            name: "Emergency Fund",
+            amount: emergencyAmount,
+            description: "Unexpected expenses and repairs",
+            icon: <Shield className="h-4 w-4 text-muted-foreground" />
+          },
+          {
+            name: "Equipment Replacement",
+            amount: equipmentAmount,
+            description: "Phone, laptop, electronics replacement",
+            icon: <Smartphone className="h-4 w-4 text-muted-foreground" />
+          },
+          {
+            name: "General Repairs",
+            amount: repairsAmount,
+            description: "Home repairs and maintenance",
+            icon: <Hammer className="h-4 w-4 text-muted-foreground" />
+          }
+        ];
+      })()
     }
   ];
 

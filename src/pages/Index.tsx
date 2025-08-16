@@ -32,6 +32,7 @@ interface FormData {
   customRent: number;
   hasRoommates: boolean;
   numRoommates: number;
+  hasCar: boolean;
 }
 
 const Index = () => {
@@ -201,6 +202,7 @@ const Index = () => {
                   customRent={formData.customRent}
                   hasRoommates={formData.hasRoommates}
                   numRoommates={formData.numRoommates}
+                  hasCar={formData.hasCar}
                   appliedLoopholes={appliedLoopholes}
                 />
               </div>

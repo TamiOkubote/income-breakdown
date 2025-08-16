@@ -17,6 +17,7 @@ interface IncomeFormProps {
     customRent: number;
     hasRoommates: boolean;
     numRoommates: number;
+    hasCar: boolean;
   }) => void;
 }
 
@@ -31,6 +32,7 @@ const IncomeForm = ({ onSubmit }: IncomeFormProps) => {
   const [customRent, setCustomRent] = useState("");
   const [hasRoommates, setHasRoommates] = useState<boolean | null>(null);
   const [numRoommates, setNumRoommates] = useState("");
+  const [hasCar, setHasCar] = useState<boolean | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +40,7 @@ const IncomeForm = ({ onSubmit }: IncomeFormProps) => {
                        hasHousing !== null && 
                        (hasHousing === false || (knowsRent !== null && 
                        (knowsRent === false || customRent) && hasRoommates !== null && 
-                       (hasRoommates === false || numRoommates)));
+                       (hasRoommates === false || numRoommates))) && hasCar !== null;
     
     if (isFormValid) {
       onSubmit({ 
@@ -51,7 +53,8 @@ const IncomeForm = ({ onSubmit }: IncomeFormProps) => {
         knowsRent: knowsRent || false,
         customRent: parseFloat(customRent) || 0,
         hasRoommates: hasRoommates || false,
-        numRoommates: parseInt(numRoommates) || 0
+        numRoommates: parseInt(numRoommates) || 0,
+        hasCar: hasCar!
       });
     }
   };
@@ -307,14 +310,43 @@ const IncomeForm = ({ onSubmit }: IncomeFormProps) => {
             )}
           </div>
 
-          <Button 
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">Do you have a car?</Label>
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={() => setHasCar(true)}
+                className={`px-4 py-2 rounded-md border transition-colors ${
+                  hasCar === true 
+                    ? 'bg-primary text-primary-foreground border-primary' 
+                    : 'border-border hover:bg-muted'
+                }`}
+              >
+                Yes
+              </button>
+              <button
+                type="button"
+                onClick={() => setHasCar(false)}
+                className={`px-4 py-2 rounded-md border transition-colors ${
+                  hasCar === false 
+                    ? 'bg-primary text-primary-foreground border-primary' 
+                    : 'border-border hover:bg-muted'
+                }`}
+              >
+                No
+              </button>
+            </div>
+          </div>
+
+          <Button
             type="submit" 
             className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity"
             disabled={!postcode || !city || !workplacePostcode || !workplaceCity || !income || 
                      hasHousing === null || (hasHousing && knowsRent === null) || 
                      (hasHousing && knowsRent && !customRent) || 
                      (hasHousing && knowsRent !== null && hasRoommates === null) || 
-                     (hasHousing && knowsRent !== null && hasRoommates && !numRoommates)}
+                     (hasHousing && knowsRent !== null && hasRoommates && !numRoommates) ||
+                     hasCar === null}
           >
             Analyze My Finances
           </Button>

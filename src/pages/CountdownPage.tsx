@@ -64,7 +64,7 @@ const CountdownPage = () => {
 
           {/* Countdown Display */}
           <div className="mt-12">
-            <div className="text-6xl md:text-8xl font-bold text-white mb-4 animate-pulse">
+            <div className="text-6xl md:text-8xl font-bold text-foreground mb-4 animate-pulse">
               {countdown}
             </div>
             <div className="w-full bg-white/20 rounded-full h-2 overflow-hidden">
