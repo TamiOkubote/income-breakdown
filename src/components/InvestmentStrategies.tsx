@@ -468,7 +468,7 @@ const InvestmentStrategies = ({ remainingIncome }: InvestmentStrategiesProps) =>
                         monthlyContribution={remainingIncome}
                         expectedReturn={parseFloat(phase.expectedReturn.replace('%', ''))}
                         volatility={strategy.name === 'Conservative Approach' ? 8 : strategy.name === 'Balanced Growth' ? 12 : 18}
-                        years={parseInt(phase.timeframe.split(' ')[0]) || 5}
+                        years={index === 0 ? 1 : index === 1 ? 4 : 5}
                         strategy={`${strategy.name} - ${phase.phase}`}
                       />
 
