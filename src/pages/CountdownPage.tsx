@@ -24,7 +24,8 @@ const CountdownPage = () => {
       setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          navigate("/financial-plan", { state: { formData } });
+          // Navigate back to index with form data to show results
+          navigate("/", { state: { formData, showResults: true } });
           return 0;
         }
         return prev - 1;

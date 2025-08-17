@@ -94,7 +94,8 @@ const Index = () => {
   };
 
   const handleFormSubmit = (data: FormData) => {
-    navigate("/financial-plan", { state: { formData: data } });
+    // Navigate to countdown page instead of processing immediately
+    navigate("/countdown", { state: { formData: data } });
   };
 
   const processFormData = (data: FormData) => {
