@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +20,8 @@ interface WordFrequency {
 
 const FeedbackAnalytics = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const referrer = location.state?.from || '/feedback';
   const [allFeedback, setAllFeedback] = useState<FeedbackPoint[]>([]);
   const [wordCloud, setWordCloud] = useState<WordFrequency[]>([]);
 
@@ -93,11 +95,11 @@ const FeedbackAnalytics = () => {
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
-                  onClick={() => navigate(-1)}
+                  onClick={() => navigate(referrer)}
                   className="flex items-center gap-2 text-primary hover:text-primary/80"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  Back to Feedback
+                  Back
                 </Button>
               </div>
               <h1 className="text-3xl font-bold text-primary flex items-center gap-2">

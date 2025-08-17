@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ArrowLeft, ExternalLink, TrendingUp, TrendingDown, Users, DollarSign } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Header from "@/components/Header";
 import CongressMemberProfile from "@/components/CongressMemberProfile";
 
@@ -79,6 +79,8 @@ const congressMembers = [
 
 const CongressTrades = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const referrer = location.state?.from || '/';
   const [selectedMember, setSelectedMember] = useState<typeof congressMembers[0] | null>(null);
 
   const totalTradesValue = congressMembers.reduce((sum, member) => sum + member.totalValue, 0);
@@ -100,11 +102,11 @@ const CongressTrades = () => {
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
-                  onClick={() => navigate('/')}
+                  onClick={() => navigate(referrer)}
                   className="flex items-center gap-2 text-primary hover:text-primary/80"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  Back to Main
+                  Back
                 </Button>
               </div>
               <h1 className="text-3xl font-bold text-primary flex items-center gap-2">

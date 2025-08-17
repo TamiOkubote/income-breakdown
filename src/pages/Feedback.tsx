@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,6 +15,8 @@ interface FeedbackPoint {
 
 const Feedback = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const referrer = location.state?.from || '/';
   const [feedbackPoints, setFeedbackPoints] = useState<FeedbackPoint[]>([]);
   const [currentFeedback, setCurrentFeedback] = useState('');
 
@@ -62,7 +64,7 @@ const Feedback = () => {
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
-                  onClick={() => navigate(-1)}
+                  onClick={() => navigate(referrer)}
                   className="flex items-center gap-2 text-primary hover:text-primary/80"
                 >
                   <ArrowLeft className="h-4 w-4" />

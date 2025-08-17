@@ -6,7 +6,7 @@ import Header from "@/components/Header";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
 import { Users, Eye, Clock, TrendingUp, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface AnalyticsData {
   totalSessions: number;
@@ -19,6 +19,8 @@ interface AnalyticsData {
 
 const Analytics = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const referrer = location.state?.from || '/';
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData>({
     totalSessions: 0,
     activeSessions: 0,
@@ -133,7 +135,7 @@ const Analytics = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate(-1)}
+              onClick={() => navigate(referrer)}
               className="flex items-center gap-2"
             >
               <ArrowLeft className="h-4 w-4" />
