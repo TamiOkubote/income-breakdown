@@ -16,7 +16,21 @@ interface FeedbackPoint {
 const Feedback = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const referrer = location.state?.from || '/';
+  
+  // Check if we should return to investments page
+  const getReferrer = () => {
+    const from = location.state?.from;
+    if (from === '/investments') {
+      const savedState = localStorage.getItem('investmentState');
+      if (savedState) {
+        const parsed = JSON.parse(savedState);
+        return { pathname: '/investments', state: parsed };
+      }
+    }
+    return from || '/';
+  };
+  
+  const referrer = getReferrer();
   const [feedbackPoints, setFeedbackPoints] = useState<FeedbackPoint[]>([]);
   const [currentFeedback, setCurrentFeedback] = useState('');
 
@@ -64,7 +78,13 @@ const Feedback = () => {
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
-                  onClick={() => navigate(referrer)}
+                  onClick={() => {
+                    if (typeof referrer === 'object') {
+                      navigate(referrer.pathname, { state: referrer.state });
+                    } else {
+                      navigate(referrer);
+                    }
+                  }}
                   className="flex items-center gap-2 text-primary hover:text-primary/80"
                 >
                   <ArrowLeft className="h-4 w-4" />

@@ -20,7 +20,21 @@ interface AnalyticsData {
 const Analytics = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const referrer = location.state?.from || '/';
+  
+  // Check if we should return to investments page
+  const getReferrer = () => {
+    const from = location.state?.from;
+    if (from === '/investments') {
+      const savedState = localStorage.getItem('investmentState');
+      if (savedState) {
+        const parsed = JSON.parse(savedState);
+        return { pathname: '/investments', state: parsed };
+      }
+    }
+    return from || '/';
+  };
+  
+  const referrer = getReferrer();
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData>({
     totalSessions: 0,
     activeSessions: 0,
@@ -135,7 +149,13 @@ const Analytics = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate(referrer)}
+              onClick={() => {
+                if (typeof referrer === 'object') {
+                  navigate(referrer.pathname, { state: referrer.state });
+                } else {
+                  navigate(referrer);
+                }
+              }}
               className="flex items-center gap-2"
             >
               <ArrowLeft className="h-4 w-4" />

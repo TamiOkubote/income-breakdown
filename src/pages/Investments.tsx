@@ -10,9 +10,25 @@ const Investments = () => {
   const navigate = useNavigate();
   const { remainingIncome, formData } = location.state || {};
 
+  // Store investment state in localStorage when available
+  if (remainingIncome && formData) {
+    localStorage.setItem('investmentState', JSON.stringify({ remainingIncome, formData }));
+  }
+
+  // Try to get from localStorage if not in location state
+  let currentRemainingIncome = remainingIncome;
+  let currentFormData = formData;
+  
   if (!remainingIncome || !formData) {
-    navigate('/');
-    return null;
+    const savedState = localStorage.getItem('investmentState');
+    if (savedState) {
+      const parsed = JSON.parse(savedState);
+      currentRemainingIncome = parsed.remainingIncome;
+      currentFormData = parsed.formData;
+    } else {
+      navigate('/');
+      return null;
+    }
   }
 
   return (
@@ -38,14 +54,14 @@ const Investments = () => {
                 Investment Portfolio
               </h1>
               <p className="text-muted-foreground">
-                £{remainingIncome}/month available for investment • {formData.city}, {formData.postcode} • Work: {formData.workplaceCity}, {formData.workplacePostcode}
+                £{currentRemainingIncome}/month available for investment • {currentFormData.city}, {currentFormData.postcode} • Work: {currentFormData.workplaceCity}, {currentFormData.workplacePostcode}
               </p>
             </div>
           </div>
           
           <div className="space-y-8">
-            <InvestmentStrategies remainingIncome={remainingIncome} />
-            <InvestmentRecommendations remainingIncome={remainingIncome} />
+            <InvestmentStrategies remainingIncome={currentRemainingIncome} />
+            <InvestmentRecommendations remainingIncome={currentRemainingIncome} />
           </div>
         </div>
       </main>
