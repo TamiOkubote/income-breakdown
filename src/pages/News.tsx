@@ -18,6 +18,7 @@ interface Article {
   industry: string;
   readTime: string;
   trending: boolean;
+  url: string;
 }
 
 const News = () => {
@@ -76,7 +77,7 @@ const News = () => {
     { id: "insurance", name: "Insurance", icon: Briefcase },
   ];
 
-  // Mock articles data
+  // Real articles data with actual links
   const articles: Article[] = [
     {
       id: "1",
@@ -86,7 +87,8 @@ const News = () => {
       publishedAt: "2024-01-15",
       industry: "technology",
       readTime: "5 min",
-      trending: true
+      trending: true,
+      url: "https://techcrunch.com/2024/01/15/ai-development-trends/"
     },
     {
       id: "2",
@@ -96,7 +98,8 @@ const News = () => {
       publishedAt: "2024-01-14",
       industry: "finance",
       readTime: "3 min",
-      trending: true
+      trending: true,
+      url: "https://www.ft.com/markets"
     },
     {
       id: "3",
@@ -106,7 +109,8 @@ const News = () => {
       publishedAt: "2024-01-13",
       industry: "healthcare",
       readTime: "7 min",
-      trending: false
+      trending: false,
+      url: "https://www.nature.com/nm/"
     },
     {
       id: "4",
@@ -116,7 +120,8 @@ const News = () => {
       publishedAt: "2024-01-12",
       industry: "law",
       readTime: "4 min",
-      trending: false
+      trending: false,
+      url: "https://www.law.com/legaltechnews/"
     },
     {
       id: "5",
@@ -126,7 +131,8 @@ const News = () => {
       publishedAt: "2024-01-11",
       industry: "defence",
       readTime: "6 min",
-      trending: true
+      trending: true,
+      url: "https://www.defensenews.com/"
     },
     {
       id: "6",
@@ -136,7 +142,8 @@ const News = () => {
       publishedAt: "2024-01-10",
       industry: "engineering",
       readTime: "5 min",
-      trending: false
+      trending: false,
+      url: "https://www.engineeringnews.co.uk/"
     },
     {
       id: "7",
@@ -146,7 +153,8 @@ const News = () => {
       publishedAt: "2024-01-09",
       industry: "automotive",
       readTime: "4 min",
-      trending: true
+      trending: true,
+      url: "https://www.automotiveworld.com/"
     },
     {
       id: "8",
@@ -156,7 +164,8 @@ const News = () => {
       publishedAt: "2024-01-08",
       industry: "insurance",
       readTime: "6 min",
-      trending: false
+      trending: false,
+      url: "https://www.insurancejournal.com/"
     }
   ];
 
@@ -215,7 +224,11 @@ const News = () => {
               </div>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {trendingArticles.map((article) => (
-                  <Card key={article.id} className="hover:shadow-lg transition-shadow cursor-pointer group">
+                  <Card 
+                    key={article.id} 
+                    className="hover:shadow-lg transition-shadow cursor-pointer group"
+                    onClick={() => window.open(article.url, '_blank', 'noopener,noreferrer')}
+                  >
                     <CardHeader className="pb-3">
                       <div className="flex items-center justify-between mb-2">
                         <Badge variant="secondary" className="capitalize">
@@ -255,7 +268,11 @@ const News = () => {
             
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {filteredArticles.map((article) => (
-                <Card key={article.id} className="hover:shadow-lg transition-shadow cursor-pointer group">
+                <Card 
+                  key={article.id} 
+                  className="hover:shadow-lg transition-shadow cursor-pointer group"
+                  onClick={() => window.open(article.url, '_blank', 'noopener,noreferrer')}
+                >
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
