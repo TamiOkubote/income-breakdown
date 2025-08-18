@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import InvestmentStrategies from "@/components/InvestmentStrategies";
 import InvestmentRecommendations from "@/components/InvestmentRecommendations";
 import Header from "@/components/Header";
+import AIChatbot from "@/components/AIChatbot";
 
 const Investments = () => {
   const location = useLocation();
@@ -65,6 +66,9 @@ const Investments = () => {
           </div>
         </div>
       </main>
+      
+      {/* AI Chatbot */}
+      <AIChatbot className="bottom-8 right-8" />
     </div>
   );
 };

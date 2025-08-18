@@ -1,5 +1,5 @@
 
-import { Calculator, Settings as SettingsIcon, MessageSquare, BarChart3, ExternalLink, Github, Linkedin, Users } from "lucide-react";
+import { Calculator, Settings as SettingsIcon, MessageSquare, BarChart3, ExternalLink, Github, Linkedin, Users, Newspaper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -68,6 +68,15 @@ const Header = () => {
             </div>
             
             <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/news', { state: { from: location.pathname } })}
+                className="text-primary-foreground hover:bg-white/10"
+              >
+                <Newspaper className="h-4 w-4 mr-1" />
+                <span className="hidden sm:inline">News</span>
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"

@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import CountdownPage from "./pages/CountdownPage";
 import Investments from "./pages/Investments";
+import News from "./pages/News";
 import Feedback from "./pages/Feedback";
 import FeedbackAnalytics from "./pages/FeedbackAnalytics";
 import Analytics from "./pages/Analytics";
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/countdown" element={<CountdownPage />} />
           <Route path="/investments" element={<Investments />} />
+          <Route path="/news" element={<News />} />
           <Route path="/feedback" element={<Feedback />} />
           <Route path="/feedback-analytics" element={<FeedbackAnalytics />} />
           <Route path="/analytics" element={<Analytics />} />
