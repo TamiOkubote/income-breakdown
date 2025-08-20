@@ -11,6 +11,7 @@ import Feedback from "./pages/Feedback";
 import FeedbackAnalytics from "./pages/FeedbackAnalytics";
 import Analytics from "./pages/Analytics";
 import CongressTrades from "./pages/CongressTrades";
+import Scholarships from "./pages/Scholarships";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/feedback-analytics" element={<FeedbackAnalytics />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/congress-trades" element={<CongressTrades />} />
+          <Route path="/scholarships" element={<Scholarships />} />
           <Route path="/settings" element={<Settings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
