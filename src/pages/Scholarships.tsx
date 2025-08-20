@@ -385,7 +385,15 @@ const Scholarships = () => {
             <Card 
               key={scholarship.id} 
               className="hover:shadow-lg transition-all duration-300 group cursor-pointer"
-              onClick={() => window.open(scholarship.url, '_blank', 'noopener,noreferrer')}
+              onClick={() => {
+                console.log('Opening scholarship URL:', scholarship.url);
+                const newWindow = window.open(scholarship.url, '_blank', 'noopener,noreferrer');
+                if (!newWindow) {
+                  console.error('Popup blocked, trying alternative method');
+                  // Fallback for popup blockers
+                  window.location.href = scholarship.url;
+                }
+              }}
             >
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between mb-2">
@@ -443,7 +451,13 @@ const Scholarships = () => {
                   className="w-full mt-4" 
                   onClick={(e) => {
                     e.stopPropagation();
-                    window.open(scholarship.url, '_blank', 'noopener,noreferrer');
+                    console.log('Button clicked for scholarship:', scholarship.name, 'URL:', scholarship.url);
+                    const newWindow = window.open(scholarship.url, '_blank', 'noopener,noreferrer');
+                    if (!newWindow) {
+                      console.error('Popup blocked for:', scholarship.url);
+                      // Fallback for popup blockers - open in same tab
+                      window.location.href = scholarship.url;
+                    }
                   }}
                 >
                   Apply Now
@@ -477,7 +491,10 @@ const Scholarships = () => {
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => window.open('https://www.ucas.com/finance', '_blank')}
+                onClick={() => {
+                  const newWindow = window.open('https://www.ucas.com/finance', '_blank', 'noopener,noreferrer');
+                  if (!newWindow) window.location.href = 'https://www.ucas.com/finance';
+                }}
               >
                 Visit Site <ExternalLink className="ml-1 h-3 w-3" />
               </Button>
@@ -491,7 +508,10 @@ const Scholarships = () => {
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => window.open('https://www.turn2us.org.uk/', '_blank')}
+                onClick={() => {
+                  const newWindow = window.open('https://www.turn2us.org.uk/', '_blank', 'noopener,noreferrer');
+                  if (!newWindow) window.location.href = 'https://www.turn2us.org.uk/';
+                }}
               >
                 Visit Site <ExternalLink className="ml-1 h-3 w-3" />
               </Button>
@@ -505,7 +525,10 @@ const Scholarships = () => {
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => window.open('https://www.scholarship-hub.org.uk/', '_blank')}
+                onClick={() => {
+                  const newWindow = window.open('https://www.scholarship-hub.org.uk/', '_blank', 'noopener,noreferrer');
+                  if (!newWindow) window.location.href = 'https://www.scholarship-hub.org.uk/';
+                }}
               >
                 Visit Site <ExternalLink className="ml-1 h-3 w-3" />
               </Button>
