@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/Header";
-import AIChatbot from "@/components/AIChatbot";
+
 import { useAnalytics } from "@/hooks/useAnalytics";
 
 interface Article {
@@ -306,9 +306,6 @@ const News = () => {
           </TabsContent>
         </Tabs>
       </main>
-      
-      {/* AI Chatbot */}
-      <AIChatbot className="bottom-8 right-8" />
     </div>
   );
 };

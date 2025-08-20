@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
-import AIChatbot from "@/components/AIChatbot";
+
 import { useAnalytics } from "@/hooks/useAnalytics";
 import IncomeForm from "@/components/IncomeForm";
 import ExpenseBreakdown from "@/components/ExpenseBreakdown";
@@ -235,9 +235,6 @@ const Index = () => {
           </div>
         )}
       </main>
-      
-      {/* AI Chatbot */}
-      <AIChatbot className="bottom-8 right-8" />
     </div>
   );
 };
