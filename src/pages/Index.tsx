@@ -9,6 +9,7 @@ import IncomeForm from "@/components/IncomeForm";
 import ExpenseBreakdown from "@/components/ExpenseBreakdown";
 import FinancialSummary from "@/components/FinancialSummary";
 import InvestmentStrategies from "@/components/InvestmentStrategies";
+import { calculateExpenseBreakdown } from "@/lib/expenseCalculations";
 
 interface TaxLoophole {
   id: string;
@@ -151,6 +152,20 @@ const Index = () => {
 
   const remainingIncome = formData ? formData.income - totalExpenses : 0;
 
+  // Calculate expense breakdown for weekly budget
+  const expenseBreakdown = formData ? calculateExpenseBreakdown({
+    income: formData.income,
+    postcode: formData.postcode,
+    city: formData.city,
+    workplacePostcode: formData.workplacePostcode,
+    hasHousing: formData.hasHousing,
+    knowsRent: formData.knowsRent,
+    customRent: formData.customRent,
+    hasRoommates: formData.hasRoommates,
+    numRoommates: formData.numRoommates,
+    hasCar: formData.hasCar,
+  }) : [];
+
   const handleApplyLoopholes = (selectedLoopholes: TaxLoophole[]) => {
     setAppliedLoopholes(selectedLoopholes);
   };
@@ -192,6 +207,7 @@ const Index = () => {
                   remainingIncome={remainingIncome}
                   onApplyLoopholes={handleApplyLoopholes}
                   appliedLoopholes={appliedLoopholes}
+                  expenseBreakdown={expenseBreakdown}
                 />
                 <ExpenseBreakdown 
                   income={formData.income} 

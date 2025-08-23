@@ -2,7 +2,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import TaxLoopholes from "@/components/TaxLoopholes";
+import { useState } from "react";
 import { 
   PoundSterling, 
   TrendingUp, 
@@ -10,7 +15,9 @@ import {
   Target,
   AlertCircle,
   CheckCircle,
-  Zap
+  Zap,
+  Calendar,
+  Calculator
 } from "lucide-react";
 
 interface TaxLoophole {
@@ -25,15 +32,27 @@ interface TaxLoophole {
   category: 'pensions' | 'isa' | 'business' | 'property' | 'education' | 'other';
 }
 
+interface ExpenseItem {
+  category: string;
+  amount: number;
+  percentage: number;
+  icon: React.ReactNode;
+  description: string;
+}
+
 interface FinancialSummaryProps {
   income: number;
   totalExpenses: number;
   remainingIncome: number;
   onApplyLoopholes: (selectedLoopholes: TaxLoophole[]) => void;
   appliedLoopholes: TaxLoophole[];
+  expenseBreakdown?: ExpenseItem[];
 }
 
-const FinancialSummary = ({ income, totalExpenses, remainingIncome, onApplyLoopholes, appliedLoopholes }: FinancialSummaryProps) => {
+const FinancialSummary = ({ income, totalExpenses, remainingIncome, onApplyLoopholes, appliedLoopholes, expenseBreakdown = [] }: FinancialSummaryProps) => {
+  const [hasOverspent, setHasOverspent] = useState<string>('');
+  const [actualSpending, setActualSpending] = useState<string>('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const savingsRate = (remainingIncome / income) * 100;
   const expenseRate = (totalExpenses / income) * 100;
 
@@ -57,6 +76,56 @@ const FinancialSummary = ({ income, totalExpenses, remainingIncome, onApplyLooph
   };
 
   const health = getHealthStatus();
+
+  // Weekly budget calculations
+  const getWeeklyBudgets = () => {
+    return expenseBreakdown
+      .filter(expense => !expense.category.includes('Taxes') && !expense.category.includes('Housing'))
+      .map(expense => ({
+        category: expense.category,
+        weeklyBudget: Math.round(expense.amount / 4.33), // Convert monthly to weekly
+        monthlyAmount: expense.amount,
+        icon: expense.icon
+      }));
+  };
+
+  const weeklyBudgets = getWeeklyBudgets();
+  const totalWeeklyBudget = weeklyBudgets.reduce((sum, budget) => sum + budget.weeklyBudget, 0);
+
+  const handleSubmitSpending = () => {
+    if (hasOverspent && actualSpending) {
+      setShowSuggestions(true);
+    }
+  };
+
+  const calculateSavingsOrOverspend = () => {
+    const spentAmount = parseFloat(actualSpending) || 0;
+    if (hasOverspent === 'no') {
+      return totalWeeklyBudget - spentAmount;
+    } else {
+      return spentAmount - totalWeeklyBudget;
+    }
+  };
+
+  const getSuggestions = () => {
+    const amount = calculateSavingsOrOverspend();
+    
+    if (hasOverspent === 'no') {
+      return [
+        `Increase next week's budget by £${Math.round(amount * 0.7)} for more flexibility`,
+        `Add £${Math.round(amount * 0.3)} to your savings account`,
+        `Set aside £${amount} as an emergency buffer for unexpected expenses`
+      ];
+    } else {
+      return [
+        'Cut discretionary spending like dining out and entertainment',
+        'Use public transport instead of taxis/rideshares',
+        'Prepare meals at home instead of ordering takeout',
+        'Review and cancel unused subscriptions temporarily',
+        `Reduce available savings by £${Math.round(amount)} to cover overspend`
+      ];
+    }
+  };
 
   return (
     <Card className="border-0 shadow-lg bg-gradient-to-br from-primary/5 to-accent/5">
@@ -177,6 +246,125 @@ const FinancialSummary = ({ income, totalExpenses, remainingIncome, onApplyLooph
               )}
             </div>
           </div>
+        )}
+
+        {/* Weekly Budget Tracker */}
+        {weeklyBudgets.length > 0 && (
+          <Card className="border border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Calendar className="h-5 w-5 text-primary" />
+                Weekly Budget Tracker
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Manage your weekly spending based on your monthly budget
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Weekly Budget Breakdown */}
+              <div className="space-y-3">
+                <h4 className="font-medium text-sm">Weekly Budget Allocation</h4>
+                {weeklyBudgets.map((budget, index) => (
+                  <div key={index} className="flex items-center justify-between p-2 bg-white/50 rounded-md">
+                    <div className="flex items-center gap-2">
+                      {budget.icon}
+                      <span className="text-sm font-medium">{budget.category}</span>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-bold">£{budget.weeklyBudget}</div>
+                      <div className="text-xs text-muted-foreground">(£{budget.monthlyAmount}/month)</div>
+                    </div>
+                  </div>
+                ))}
+                <div className="border-t pt-2">
+                  <div className="flex items-center justify-between font-semibold">
+                    <span className="flex items-center gap-2">
+                      <Calculator className="h-4 w-4" />
+                      Total Weekly Budget
+                    </span>
+                    <span className="text-primary">£{totalWeeklyBudget}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Spending Questions */}
+              <div className="space-y-4 p-4 bg-white/30 rounded-lg">
+                <div className="space-y-3">
+                  <Label className="text-base font-medium">Did you overspend this week?</Label>
+                  <RadioGroup value={hasOverspent} onValueChange={setHasOverspent} className="flex gap-6">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="yes" id="yes" />
+                      <Label htmlFor="yes">Yes</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="no" id="no" />
+                      <Label htmlFor="no">No</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+
+                {hasOverspent && (
+                  <div className="space-y-2">
+                    <Label htmlFor="actual-spending" className="text-sm font-medium">
+                      How much did you actually spend this week?
+                    </Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="actual-spending"
+                        type="number"
+                        placeholder="Enter amount"
+                        value={actualSpending}
+                        onChange={(e) => setActualSpending(e.target.value)}
+                        className="flex-1"
+                      />
+                      <Button onClick={handleSubmitSpending} disabled={!actualSpending}>
+                        Calculate
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Suggestions */}
+              {showSuggestions && actualSpending && (
+                <div className={`p-4 rounded-lg border ${
+                  hasOverspent === 'no' 
+                    ? 'bg-green-50 border-green-200' 
+                    : 'bg-red-50 border-red-200'
+                }`}>
+                  <h4 className={`font-semibold mb-2 ${
+                    hasOverspent === 'no' ? 'text-green-800' : 'text-red-800'
+                  }`}>
+                    {hasOverspent === 'no' 
+                      ? `Great! You saved £${calculateSavingsOrOverspend()} this week` 
+                      : `You overspent by £${calculateSavingsOrOverspend()} this week`
+                    }
+                  </h4>
+                  <div className="space-y-1">
+                    {getSuggestions().map((suggestion, index) => (
+                      <p key={index} className={`text-sm ${
+                        hasOverspent === 'no' ? 'text-green-700' : 'text-red-700'
+                      }`}>
+                        • {suggestion}
+                      </p>
+                    ))}
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="mt-3"
+                    onClick={() => {
+                      setHasOverspent('');
+                      setActualSpending('');
+                      setShowSuggestions(false);
+                    }}
+                  >
+                    Track Another Week
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         )}
 
         <div className="text-sm text-muted-foreground space-y-3">
