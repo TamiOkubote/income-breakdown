@@ -3,8 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
-import { TrendingUp, TrendingDown, Info } from "lucide-react";
+import { TrendingUp, TrendingDown, Info, BarChart3 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import AdvancedAnalytics from "./AdvancedAnalytics";
 
 interface MonteCarloSimulationProps {
   initialAmount: number;
@@ -24,6 +25,7 @@ const MonteCarloSimulation = ({
   strategy
 }: MonteCarloSimulationProps) => {
   const [showDetails, setShowDetails] = useState(false);
+  const [showAdvancedAnalytics, setShowAdvancedAnalytics] = useState(false);
   
   // Monte Carlo simulation function using Sharpe ratio calculations
   const runSimulation = (simulations = 1000) => {
@@ -110,48 +112,58 @@ const MonteCarloSimulation = ({
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>Monte Carlo Simulation - {strategy}</span>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="ghost" size="sm">
-                <Info className="h-4 w-4" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Understanding Monte Carlo Simulation</DialogTitle>
-                <DialogDescription className="space-y-4">
-                  <p>
-                    A Monte Carlo simulation runs thousands of possible scenarios to show the range of 
-                    potential investment outcomes based on historical market volatility.
-                  </p>
-                  <div className="space-y-2">
-                    <p><strong>Sharpe Ratio Analysis:</strong></p>
-                    <p className="text-sm">This simulation uses the Sharpe ratio to calculate risk-adjusted returns:</p>
-                    <ul className="list-disc pl-6 space-y-1 text-sm">
-                      <li><strong>R:</strong> Average return of the investment ({expectedReturn}%)</li>
-                      <li><strong>Rf:</strong> Risk-free rate (UK Treasury bonds ~4%)</li>
-                      <li><strong>σ:</strong> Standard deviation of returns ({volatility}%)</li>
-                      <li><strong>Sharpe Ratio:</strong> (R - Rf) / σ = {((expectedReturn/100 - 0.04) / (volatility/100)).toFixed(2)}</li>
-                    </ul>
-                  </div>
-                  <div className="space-y-2">
-                    <p><strong>Percentiles explained:</strong></p>
-                    <ul className="list-disc pl-6 space-y-1">
-                      <li><strong>10th percentile:</strong> Only 10% of outcomes are worse than this</li>
-                      <li><strong>25th percentile:</strong> 25% of outcomes fall below this level</li>
-                      <li><strong>50th percentile (median):</strong> Half of outcomes are above/below</li>
-                      <li><strong>75th percentile:</strong> 75% of outcomes fall below this level</li>
-                      <li><strong>90th percentile:</strong> Only 10% of outcomes are better than this</li>
-                    </ul>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Remember: Past performance doesn't guarantee future results. This is a statistical model 
-                    based on historical data and assumptions.
-                  </p>
-                </DialogDescription>
-              </DialogHeader>
-            </DialogContent>
-          </Dialog>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setShowAdvancedAnalytics(true)}
+            >
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Advanced Metrics & Insights
+            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <Info className="h-4 w-4" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Understanding Monte Carlo Simulation</DialogTitle>
+                  <DialogDescription className="space-y-4">
+                    <p>
+                      A Monte Carlo simulation runs thousands of possible scenarios to show the range of 
+                      potential investment outcomes based on historical market volatility.
+                    </p>
+                    <div className="space-y-2">
+                      <p><strong>Sharpe Ratio Analysis:</strong></p>
+                      <p className="text-sm">This simulation uses the Sharpe ratio to calculate risk-adjusted returns:</p>
+                      <ul className="list-disc pl-6 space-y-1 text-sm">
+                        <li><strong>R:</strong> Average return of the investment ({expectedReturn}%)</li>
+                        <li><strong>Rf:</strong> Risk-free rate (UK Treasury bonds ~4%)</li>
+                        <li><strong>σ:</strong> Standard deviation of returns ({volatility}%)</li>
+                        <li><strong>Sharpe Ratio:</strong> (R - Rf) / σ = {((expectedReturn/100 - 0.04) / (volatility/100)).toFixed(2)}</li>
+                      </ul>
+                    </div>
+                    <div className="space-y-2">
+                      <p><strong>Percentiles explained:</strong></p>
+                      <ul className="list-disc pl-6 space-y-1">
+                        <li><strong>10th percentile:</strong> Only 10% of outcomes are worse than this</li>
+                        <li><strong>25th percentile:</strong> 25% of outcomes fall below this level</li>
+                        <li><strong>50th percentile (median):</strong> Half of outcomes are above/below</li>
+                        <li><strong>75th percentile:</strong> 75% of outcomes fall below this level</li>
+                        <li><strong>90th percentile:</strong> Only 10% of outcomes are better than this</li>
+                      </ul>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Remember: Past performance doesn't guarantee future results. This is a statistical model 
+                      based on historical data and assumptions.
+                    </p>
+                  </DialogDescription>
+                </DialogHeader>
+              </DialogContent>
+            </Dialog>
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -290,6 +302,26 @@ const MonteCarloSimulation = ({
             </div>
           </div>
         </div>
+        
+        {/* Advanced Analytics Dialog */}
+        <Dialog open={showAdvancedAnalytics} onOpenChange={setShowAdvancedAnalytics}>
+          <DialogContent className="max-w-7xl h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Advanced Metrics & Insights</DialogTitle>
+              <DialogDescription>
+                Comprehensive analysis with MCMC simulations, risk matrices, and advanced statistical models
+              </DialogDescription>
+            </DialogHeader>
+            <AdvancedAnalytics 
+              initialAmount={initialAmount}
+              monthlyContribution={monthlyContribution}
+              expectedReturn={expectedReturn}
+              volatility={volatility}
+              years={years}
+              strategy={strategy}
+            />
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );
