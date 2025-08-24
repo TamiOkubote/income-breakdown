@@ -7,8 +7,7 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import TaxLoopholes from "@/components/TaxLoopholes";
-import { useState, useEffect } from "react";
-import { useTranslation } from "@/hooks/useTranslation";
+import { useState } from "react";
 import { 
   PoundSterling, 
   TrendingUp, 
@@ -54,19 +53,6 @@ const FinancialSummary = ({ income, totalExpenses, remainingIncome, onApplyLooph
   const [hasOverspent, setHasOverspent] = useState<string>('');
   const [actualSpending, setActualSpending] = useState<string>('');
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const { t, updateLanguage } = useTranslation();
-
-  useEffect(() => {
-    // Listen for language changes from settings
-    const handleLanguageChange = (event: CustomEvent) => {
-      updateLanguage(event.detail.language);
-    };
-
-    window.addEventListener('languageChanged', handleLanguageChange as EventListener);
-    return () => {
-      window.removeEventListener('languageChanged', handleLanguageChange as EventListener);
-    };
-  }, [updateLanguage]);
   const savingsRate = (remainingIncome / income) * 100;
   const expenseRate = (totalExpenses / income) * 100;
 
@@ -126,8 +112,8 @@ const FinancialSummary = ({ income, totalExpenses, remainingIncome, onApplyLooph
     
     if (hasOverspent === 'no') {
       return [
-        t('financial.increaseNextWeek').replace('{{amount}}', `£${Math.round(amount * 0.7)}`),
-        t('financial.addToSavings').replace('{{amount}}', `£${Math.round(amount * 0.3)}`),
+        `Increase next week's budget by £${Math.round(amount * 0.7)} for more flexibility`,
+        `Add £${Math.round(amount * 0.3)} to your savings account`,
         `Set aside £${amount} as an emergency buffer for unexpected expenses`
       ];
     } else {
@@ -136,7 +122,7 @@ const FinancialSummary = ({ income, totalExpenses, remainingIncome, onApplyLooph
         'Use public transport instead of taxis/rideshares',
         'Prepare meals at home instead of ordering takeout',
         'Review and cancel unused subscriptions temporarily',
-        t('financial.reductionSuggestions').replace('{{amount}}', `£${Math.round(amount)}`)
+        `Reduce available savings by £${Math.round(amount)} to cover overspend`
       ];
     }
   };
@@ -146,7 +132,7 @@ const FinancialSummary = ({ income, totalExpenses, remainingIncome, onApplyLooph
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-xl">
           <Target className="h-6 w-6 text-primary" />
-          {t('financial.title')}
+          Financial Health Summary
         </CardTitle>
         {(totalLoopholeSavings > 0 || inflationImpact > 0) && (
           <div className="text-sm text-muted-foreground space-y-1">
@@ -268,7 +254,7 @@ const FinancialSummary = ({ income, totalExpenses, remainingIncome, onApplyLooph
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Calendar className="h-5 w-5 text-primary" />
-                {t('financial.weeklyBudget')}
+                Weekly Budget Tracker
               </CardTitle>
               <p className="text-sm text-muted-foreground">
                 Manage your weekly spending based on your monthly budget
@@ -294,7 +280,7 @@ const FinancialSummary = ({ income, totalExpenses, remainingIncome, onApplyLooph
                   <div className="flex items-center justify-between font-semibold">
                     <span className="flex items-center gap-2">
                       <Calculator className="h-4 w-4" />
-                      {t('financial.totalBudget')}
+                      Total Weekly Budget
                     </span>
                     <span className="text-primary">£{totalWeeklyBudget}</span>
                   </div>
@@ -304,15 +290,15 @@ const FinancialSummary = ({ income, totalExpenses, remainingIncome, onApplyLooph
               {/* Spending Questions */}
               <div className="space-y-4 p-4 bg-white/30 rounded-lg">
                 <div className="space-y-3">
-                  <Label className="text-base font-medium">{t('financial.overspent')}</Label>
+                  <Label className="text-base font-medium">Did you overspend this week?</Label>
                   <RadioGroup value={hasOverspent} onValueChange={setHasOverspent} className="flex gap-6">
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="yes" id="yes" />
-                      <Label htmlFor="yes">{t('financial.yes')}</Label>
+                      <Label htmlFor="yes">Yes</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="no" id="no" />
-                      <Label htmlFor="no">{t('financial.no')}</Label>
+                      <Label htmlFor="no">No</Label>
                     </div>
                   </RadioGroup>
                 </div>
@@ -320,7 +306,7 @@ const FinancialSummary = ({ income, totalExpenses, remainingIncome, onApplyLooph
                 {hasOverspent && (
                   <div className="space-y-2">
                     <Label htmlFor="actual-spending" className="text-sm font-medium">
-                      {t('financial.spentAmount')}
+                      How much did you actually spend this week?
                     </Label>
                     <div className="flex gap-2">
                       <Input
@@ -332,7 +318,7 @@ const FinancialSummary = ({ income, totalExpenses, remainingIncome, onApplyLooph
                         className="flex-1"
                       />
                       <Button onClick={handleSubmitSpending} disabled={!actualSpending}>
-                        {t('financial.submit')}
+                        Calculate
                       </Button>
                     </div>
                   </div>
@@ -350,8 +336,8 @@ const FinancialSummary = ({ income, totalExpenses, remainingIncome, onApplyLooph
                     hasOverspent === 'no' ? 'text-green-800' : 'text-red-800'
                   }`}>
                     {hasOverspent === 'no' 
-                      ? `${t('financial.saved')} £${calculateSavingsOrOverspend()}` 
-                      : `${t('financial.overspentAmount')} £${calculateSavingsOrOverspend()}`
+                      ? `Great! You saved £${calculateSavingsOrOverspend()} this week` 
+                      : `You overspent by £${calculateSavingsOrOverspend()} this week`
                     }
                   </h4>
                   <div className="space-y-1">
