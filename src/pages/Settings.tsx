@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Settings as SettingsIcon, Moon, Sun, Palette, Type, Eye, Volume2 } from "lucide-react";
 import Header from "@/components/Header";
+import { useTranslation } from "@/hooks/useTranslation";
+import { Language } from "@/lib/translations";
 
 interface SettingsData {
   darkMode: boolean;
@@ -17,12 +19,13 @@ interface SettingsData {
   reducedMotion: boolean;
   colorBlindMode: string;
   soundEnabled: boolean;
-  language: string;
+  language: Language;
 }
 
 const Settings = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t, updateLanguage } = useTranslation();
   
   // Check if we should return to investments page
   const getReferrer = () => {
@@ -103,11 +106,23 @@ const Settings = () => {
     setSettings(newSettings);
     setHasChanges(true);
     applySettings(newSettings);
+    
+    // Update language immediately if language setting changes
+    if (key === 'language') {
+      updateLanguage(value as Language);
+    }
   };
 
   const saveSettings = () => {
     localStorage.setItem('appSettings', JSON.stringify(settings));
     setHasChanges(false);
+    // Update translation system with saved language
+    updateLanguage(settings.language);
+    
+    // Force re-render of other components by triggering a custom event
+    window.dispatchEvent(new CustomEvent('languageChanged', { 
+      detail: { language: settings.language } 
+    }));
   };
 
   const resetSettings = () => {
@@ -146,20 +161,20 @@ const Settings = () => {
                   className="flex items-center gap-2 text-primary hover:text-primary/80"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  Back
+                  {t('settings.back')}
                 </Button>
               </div>
               <h1 className="text-3xl font-bold text-primary flex items-center gap-2">
                 <SettingsIcon className="h-8 w-8" />
-                Settings
+                {t('settings.title')}
               </h1>
               <p className="text-muted-foreground">
-                Customize your experience and accessibility preferences
+                {t('settings.subtitle')}
               </p>
             </div>
             {hasChanges && (
               <Badge variant="secondary" className="animate-pulse">
-                Unsaved Changes
+                {t('settings.unsavedChanges')}
               </Badge>
             )}
           </div>
@@ -170,7 +185,7 @@ const Settings = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Palette className="h-5 w-5 text-primary" />
-                  Appearance
+                  {t('settings.appearance')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -179,10 +194,10 @@ const Settings = () => {
                   <div className="space-y-1">
                     <Label className="flex items-center gap-2">
                       {settings.darkMode ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-                      Dark Mode
+                      {t('settings.darkMode')}
                     </Label>
                     <p className="text-sm text-muted-foreground">
-                      Toggle between light and dark themes
+                      {t('settings.darkModeDesc')}
                     </p>
                   </div>
                   <Switch
@@ -195,7 +210,7 @@ const Settings = () => {
                 <div className="space-y-3">
                   <Label className="flex items-center gap-2">
                     <Type className="h-4 w-4" />
-                    Font Size: {settings.fontSize}px
+                    {t('settings.fontSize')}: {settings.fontSize}px
                   </Label>
                   <Slider
                     value={[settings.fontSize]}
@@ -206,17 +221,17 @@ const Settings = () => {
                     className="w-full"
                   />
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Small (12px)</span>
-                    <span>Large (24px)</span>
+                    <span>{t('settings.fontSizeSmall')}</span>
+                    <span>{t('settings.fontSizeLarge')}</span>
                   </div>
                 </div>
 
                 {/* High Contrast */}
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <Label>High Contrast</Label>
+                    <Label>{t('settings.highContrast')}</Label>
                     <p className="text-sm text-muted-foreground">
-                      Increase contrast for better visibility
+                      {t('settings.highContrastDesc')}
                     </p>
                   </div>
                   <Switch
@@ -227,7 +242,7 @@ const Settings = () => {
 
                 {/* Color Blind Support */}
                 <div className="space-y-2">
-                  <Label>Color Blind Support</Label>
+                  <Label>{t('settings.colorBlind')}</Label>
                   <Select 
                     value={settings.colorBlindMode} 
                     onValueChange={(value) => updateSetting('colorBlindMode', value)}
@@ -236,10 +251,10 @@ const Settings = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">None</SelectItem>
-                      <SelectItem value="protanopia">Protanopia (Red-Blind)</SelectItem>
-                      <SelectItem value="deuteranopia">Deuteranopia (Green-Blind)</SelectItem>
-                      <SelectItem value="tritanopia">Tritanopia (Blue-Blind)</SelectItem>
+                      <SelectItem value="none">{t('settings.colorBlindNone')}</SelectItem>
+                      <SelectItem value="protanopia">{t('settings.colorBlindRed')}</SelectItem>
+                      <SelectItem value="deuteranopia">{t('settings.colorBlindGreen')}</SelectItem>
+                      <SelectItem value="tritanopia">{t('settings.colorBlindBlue')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -251,16 +266,16 @@ const Settings = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Eye className="h-5 w-5 text-primary" />
-                  Accessibility
+                  {t('settings.accessibility')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Reduced Motion */}
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <Label>Reduced Motion</Label>
+                    <Label>{t('settings.reducedMotion')}</Label>
                     <p className="text-sm text-muted-foreground">
-                      Minimize animations and transitions
+                      {t('settings.reducedMotionDesc')}
                     </p>
                   </div>
                   <Switch
@@ -274,10 +289,10 @@ const Settings = () => {
                   <div className="space-y-1">
                     <Label className="flex items-center gap-2">
                       <Volume2 className="h-4 w-4" />
-                      Sound Effects
+                      {t('settings.soundEffects')}
                     </Label>
                     <p className="text-sm text-muted-foreground">
-                      Enable audio feedback and notifications
+                      {t('settings.soundEffectsDesc')}
                     </p>
                   </div>
                   <Switch
@@ -288,10 +303,10 @@ const Settings = () => {
 
                 {/* Language */}
                 <div className="space-y-2">
-                  <Label>Language</Label>
-                  <Select 
+                  <Label>{t('settings.language')}</Label>
+                   <Select 
                     value={settings.language} 
-                    onValueChange={(value) => updateSetting('language', value)}
+                    onValueChange={(value) => updateSetting('language', value as Language)}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -309,10 +324,9 @@ const Settings = () => {
 
                 {/* Preview Text */}
                 <div className="p-4 rounded-lg border bg-background/50">
-                  <h4 className="font-medium mb-2">Preview</h4>
+                  <h4 className="font-medium mb-2">{t('settings.preview')}</h4>
                   <p className="text-sm">
-                    This is how text will appear with your current settings. 
-                    The quick brown fox jumps over the lazy dog.
+                    {t('settings.previewText')}
                   </p>
                   <div className="mt-2 flex gap-2">
                     <div className="w-4 h-4 bg-primary rounded"></div>
@@ -332,7 +346,7 @@ const Settings = () => {
               onClick={resetSettings}
               className="flex items-center gap-2"
             >
-              Reset to Defaults
+              {t('settings.resetDefaults')}
             </Button>
             <div className="flex gap-2">
               <Button
@@ -346,7 +360,7 @@ const Settings = () => {
                 }}
                 disabled={hasChanges}
               >
-                Cancel
+                {t('settings.cancel')}
               </Button>
               <Button
                 onClick={saveSettings}
@@ -354,7 +368,7 @@ const Settings = () => {
                 className="flex items-center gap-2"
               >
                 <SettingsIcon className="h-4 w-4" />
-                Save Settings
+                {t('settings.save')}
               </Button>
             </div>
           </div>
